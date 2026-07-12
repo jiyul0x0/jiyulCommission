@@ -92,12 +92,12 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
   <div class="admin-section">
     <div class="admin-section-title">✏️ 텍스트</div>
     <div class="field-grid2">
-      <div class="field-row"><label>배지</label><input type="text" id="hub-badge" placeholder="COMMISSION"></div>
-      <div class="field-row"><label>제목</label><input type="text" id="hub-title" placeholder="지율 커미션"></div>
+      <div class="field-row"><label>배지</label><input type="text" id="hub-badge" placeholder="배지 문구"></div>
+      <div class="field-row"><label>제목</label><input type="text" id="hub-title" placeholder="첫 화면 제목"></div>
     </div>
-    <div class="field-row"><label>소개문</label><textarea id="hub-subtitle" placeholder="원하시는 커미션을 선택해 주세요"></textarea></div>
-    <div class="field-row"><label>하단 문구</label><input type="text" id="hub-footer" placeholder="※ 무단 도용 및 복제를 금합니다."></div>
-    <div class="field-row"><label>브라우저 탭 제목</label><input type="text" id="hub-page_title" placeholder="지율 커미션"></div>
+    <div class="field-row"><label>소개문</label><textarea id="hub-subtitle" placeholder="첫 화면 소개문"></textarea></div>
+    <div class="field-row"><label>하단 문구</label><input type="text" id="hub-footer" placeholder="하단 경고문"></div>
+    <div class="field-row"><label>브라우저 탭 제목</label><input type="text" id="hub-page_title" placeholder="첫 화면 제목"></div>
   </div>
 
   <div class="admin-section">
@@ -111,8 +111,8 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 
     <div class="hub-preview">
       <div class="hp-inner">
-        <div class="hp-badge" id="hp-badge">COMMISSION</div>
-        <div class="hp-title" id="hp-title">커미션</div>
+        <div class="hp-badge" id="hp-badge"></div>
+        <div class="hp-title" id="hp-title"></div>
         <div class="hp-sub" id="hp-sub"></div>
         <div class="hp-cards" id="hp-cards"></div>
         <div class="hp-foot" id="hp-foot"></div>
@@ -260,9 +260,9 @@ function mediaTag(u, cls) {
 
 function drawPreview() {
   applyTheme($('hub-color').value || '#2f2f33');
-  $('hp-badge').textContent = $('hub-badge').value || 'COMMISSION';
+  $('hp-badge').textContent = $('hub-badge').value || '';
   $('hp-badge').style.display = $('hub-badge').value ? '' : 'none';
-  $('hp-title').textContent = $('hub-title').value || '커미션';
+  $('hp-title').textContent = $('hub-title').value || '(제목 없음)';
   $('hp-sub').textContent = $('hub-subtitle').value || '';
   $('hp-foot').textContent = $('hub-footer').value || '';
   const keys = Object.keys(SITES)
