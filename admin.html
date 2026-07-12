@@ -160,7 +160,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
       <div class="field-row"><label>가격표 2열 제목</label><input type="text" id="price-head2"></div>
       <div class="field-row"><label>가격표 3열 제목</label><input type="text" id="price-head3"></div>
     </div>
-    <div class="field-row"><label>가격표 하단 안내문</label><textarea id="price-note" style="min-height:60px;"></textarea></div>
+    <div class="field-row"><label>가격표 하단 안내문</label><textarea id="price-note" style="min-height:60px;" placeholder="가격표 아래 안내문 (선택)"></textarea></div>
     <div class="field-grid2">
       <div class="field-row"><label>환불표 1열 제목</label><input type="text" id="refund-head1"></div>
       <div class="field-row"><label>환불표 2열 제목</label><input type="text" id="refund-head2"></div>
@@ -246,7 +246,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 
   <div class="admin-section">
     <div class="admin-section-title">💳 8. 환불 정책</div>
-    <div class="field-row"><label>환불 정책 소개</label><textarea id="refund-intro"></textarea></div>
+    <div class="field-row"><label>환불 정책 소개</label><textarea id="refund-intro" placeholder="환불 정책 소개 (줄바꿈 그대로 반영)"></textarea></div>
     <label style="margin-bottom:10px;">환불 단계</label>
     <div id="refund-items"></div>
     <button class="btn btn-green" onclick="addRefund()" style="margin-top:8px;">+ 단계 추가</button>
@@ -663,6 +663,15 @@ window.renderHubSection = function() {
 
 /* ---------- Sortable ---------- */
 var _sortables = {};
+function emptyHint(elId, msg) {
+  var el = document.getElementById(elId);
+  if (el && !el.innerHTML.trim()) {
+    el.innerHTML = '<div class="hint" style="padding:14px 0;">' + msg + ' 아래 버튼으로 추가해 주세요.</div>';
+    return true;
+  }
+  return false;
+}
+
 function initSortable(elId, dataKey, subKey, renderFn) {
   if (_sortables[elId]) { try { _sortables[elId].destroy(); } catch(e){} }
   var el = document.getElementById(elId);
@@ -687,7 +696,7 @@ function renderSections() {
       '<div class="sec-row">' +
         '<input type="checkbox"'+(sec.visible?' checked':'')+' onchange="window.D.sections.'+k+'.visible=this.checked">' +
         '<input type="text" value="'+(sec.title||'')+'" placeholder="섹션 제목" oninput="window.D.sections.'+k+'.title=this.value">' +
-        '<input type="text" value="'+(sec.subtitle||'')+'" placeholder="부제 (선택)" oninput="window.D.sections.'+k+'.subtitle=this.value">' +
+        '<input type="text" value="'+(sec.subtitle||'')+'" placeholder="제목 아래 작게 표시될 부제 (비워도 됨)" oninput="window.D.sections.'+k+'.subtitle=this.value">' +
       '</div>';
   });
 }
@@ -695,32 +704,35 @@ function renderSections() {
 function renderNotice() {
   var el = document.getElementById('notice-items'); el.innerHTML = '';
   (window.D.notice.items||[]).forEach(function(n,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">공지 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeNotice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>아이콘</label><input type="text" value="'+(n.icon||'')+'" oninput="window.D.notice.items['+i+'].icon=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.notice.items['+i+'].type=this.value"><option value="normal"'+(n.type==="normal"?" selected":"")+'>일반</option><option value="warn"'+(n.type==="warn"?" selected":"")+'>경고(빨강)</option></select></div></div><div class="field-row"><label>제목</label><input type="text" value="'+(n.title||'')+'" oninput="window.D.notice.items['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea oninput="window.D.notice.items['+i+'].body=this.value">'+(n.body||'')+'</textarea></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">공지 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeNotice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>아이콘</label><input type="text" value="'+(n.icon||'')+'" placeholder="이모지 1개 (예 📌)" oninput="window.D.notice.items['+i+'].icon=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.notice.items['+i+'].type=this.value"><option value="normal"'+(n.type==="normal"?" selected":"")+'>일반</option><option value="warn"'+(n.type==="warn"?" selected":"")+'>경고(빨강)</option></select></div></div><div class="field-row"><label>제목</label><input type="text" value="'+(n.title||'')+'" placeholder="공지 제목" oninput="window.D.notice.items['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea placeholder="공지 내용 (줄바꿈 그대로 반영)" oninput="window.D.notice.items['+i+'].body=this.value">'+(n.body||'')+'</textarea></div></div>';
   });
+  if (emptyHint('notice-items', '등록된 공지가 없어요.')) return;
   initSortable('notice-items','notice','items',renderNotice);
 }
-function addNotice() { window.D.notice.items.push({icon:'📌',title:'새 공지',body:'내용 입력',type:'normal'}); renderNotice(); }
+function addNotice() { window.D.notice.items.push({icon:'',title:'',body:'',type:'normal'}); renderNotice(); }
 function removeNotice(i) { window.D.notice.items.splice(i,1); renderNotice(); }
 
 function renderStatus() {
   var el = document.getElementById('status-items'); el.innerHTML = '';
   (window.D.status||[]).forEach(function(s,i) {
     var opts = ['open','wait','closed'].map(function(t){ return '<option value="'+t+'"'+(s.type===t?' selected':'')+'>'+{open:'접수중',wait:'대기중',closed:'마감'}[t]+'</option>'; }).join('');
-    el.innerHTML += '<div class="status-row"><span class="drag-handle">'+H+'</span><input type="text" value="'+(s.label||'')+'" placeholder="항목명" oninput="window.D.status['+i+'].label=this.value"><input type="text" value="'+(s.desc||'')+'" placeholder="설명" oninput="window.D.status['+i+'].desc=this.value"><select onchange="window.D.status['+i+'].type=this.value">'+opts+'</select><button class="btn btn-red" onclick="removeStatus('+i+')">삭제</button></div>';
+    el.innerHTML += '<div class="status-row"><span class="drag-handle">'+H+'</span><input type="text" value="'+(s.label||'')+'" placeholder="상태 이름" oninput="window.D.status['+i+'].label=this.value"><input type="text" value="'+(s.desc||'')+'" placeholder="한 줄 설명" oninput="window.D.status['+i+'].desc=this.value"><select onchange="window.D.status['+i+'].type=this.value">'+opts+'</select><button class="btn btn-red" onclick="removeStatus('+i+')">삭제</button></div>';
   });
+  if (emptyHint('status-items', '등록된 항목이 없어요.')) return;
   initSortable('status-items','status',null,renderStatus);
 }
-function addStatus() { window.D.status.push({label:'새 항목',type:'open',desc:'설명'}); renderStatus(); }
+function addStatus() { window.D.status.push({label:'',type:'open',desc:''}); renderStatus(); }
 function removeStatus(i) { window.D.status.splice(i,1); renderStatus(); }
 
 function renderProcess() {
   var el = document.getElementById('process-items'); el.innerHTML = '';
   (window.D.process||[]).forEach(function(p,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeProcess('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(p.title||'')+'" oninput="window.D.process['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea oninput="window.D.process['+i+'].body=this.value">'+(p.body||'')+'</textarea></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeProcess('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(p.title||'')+'" placeholder="단계 제목" oninput="window.D.process['+i+'].title=this.value"></div><div class="field-row"><label>내용</label><textarea placeholder="이 단계에서 할 일" oninput="window.D.process['+i+'].body=this.value">'+(p.body||'')+'</textarea></div></div>';
   });
+  if (emptyHint('process-items', '등록된 단계가 없어요.')) return;
   initSortable('process-items','process',null,renderProcess);
 }
-function addProcess() { window.D.process.push({title:'새 단계',body:'내용 입력'}); renderProcess(); }
+function addProcess() { window.D.process.push({title:'',body:''}); renderProcess(); }
 function removeProcess(i) { window.D.process.splice(i,1); renderProcess(); }
 
 function renderCollab() {
@@ -749,13 +761,14 @@ function renderCollab() {
           '</div>' +
         '</div>' +
         '<div class="field-grid2">' +
-          '<div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" oninput="window.D.collab.items['+i+'].name=this.value"></div>' +
+          '<div class="field-row"><label>작가명</label><input type="text" value="'+(c.name||'')+'" placeholder="작가명" oninput="window.D.collab.items['+i+'].name=this.value"></div>' +
           '<div class="field-row"><label>작가 사이트 URL</label><input type="text" value="'+(c.link||'')+'" placeholder="https://..." oninput="window.D.collab.items['+i+'].link=this.value"></div>' +
         '</div>' +
-        '<div class="field-row"><label>협업 혜택</label><input type="text" value="'+(c.main_desc||'')+'" oninput="window.D.collab.items['+i+'].main_desc=this.value"></div>' +
-        '<div class="field-row"><label>설명</label><input type="text" value="'+(c.sub_desc||'')+'" oninput="window.D.collab.items['+i+'].sub_desc=this.value"></div>' +
+        '<div class="field-row"><label>협업 혜택</label><input type="text" value="'+(c.main_desc||'')+'" placeholder="협업 혜택" oninput="window.D.collab.items['+i+'].main_desc=this.value"></div>' +
+        '<div class="field-row"><label>설명</label><input type="text" value="'+(c.sub_desc||'')+'" placeholder="설명" oninput="window.D.collab.items['+i+'].sub_desc=this.value"></div>' +
       '</div>';
   });
+  if (emptyHint('collab-items', '등록된 작가가 없어요.')) return;
   initSortable('collab-items','collab','items',renderCollab);
 }
 function setCollabImgMode(i, mode) {
@@ -774,48 +787,52 @@ function uploadCollabImg(input, i) {
   reader.onload = function(e) { window.D.collab.items[i].image = e.target.result; renderCollab(); };
   reader.readAsDataURL(file);
 }
-function addCollab() { window.D.collab.items.push({image:'',name:'작가명',link:'',main_desc:'협업 혜택',sub_desc:'설명'}); renderCollab(); }
+function addCollab() { window.D.collab.items.push({image:'',name:'',link:'',main_desc:'',sub_desc:''}); renderCollab(); }
 function removeCollab(i) { window.D.collab.items.splice(i,1); renderCollab(); }
 
 function renderPrice() {
   var el = document.getElementById('price-items'); el.innerHTML = '';
   (window.D.price||[]).forEach(function(p,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">항목 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removePrice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>카테고리</label><input type="text" value="'+(p.category||'')+'" oninput="window.D.price['+i+'].category=this.value"></div><div class="field-row"><label>배지</label><input type="text" value="'+(p.badge||'')+'" oninput="window.D.price['+i+'].badge=this.value"></div></div><div class="field-grid2"><div class="field-row"><label>항목명</label><input type="text" value="'+(p.item||'')+'" oninput="window.D.price['+i+'].item=this.value"></div><div class="field-row"><label>가격</label><input type="text" value="'+(p.price||'')+'" oninput="window.D.price['+i+'].price=this.value"></div></div><div class="field-row"><label>설명</label><input type="text" value="'+(p.desc||'')+'" oninput="window.D.price['+i+'].desc=this.value"></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">항목 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removePrice('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>카테고리</label><input type="text" value="'+(p.category||'')+'" placeholder="같은 이름끼리 묶여요" oninput="window.D.price['+i+'].category=this.value"></div><div class="field-row"><label>배지</label><input type="text" value="'+(p.badge||'')+'" placeholder="항목명 옆 작은 라벨 (선택)" oninput="window.D.price['+i+'].badge=this.value"></div></div><div class="field-grid2"><div class="field-row"><label>항목명</label><input type="text" value="'+(p.item||'')+'" placeholder="작업 항목" oninput="window.D.price['+i+'].item=this.value"></div><div class="field-row"><label>가격</label><input type="text" value="'+(p.price||'')+'" placeholder="협의 / 50,000원" oninput="window.D.price['+i+'].price=this.value"></div></div><div class="field-row"><label>설명</label><input type="text" value="'+(p.desc||'')+'" placeholder="포함 내용" oninput="window.D.price['+i+'].desc=this.value"></div></div>';
   });
+  if (emptyHint('price-items', '등록된 항목이 없어요.')) return;
   initSortable('price-items','price',null,renderPrice);
 }
-function addPrice() { window.D.price.push({category:'카테고리',item:'항목명',badge:'',desc:'설명',price:'협의'}); renderPrice(); }
+function addPrice() { window.D.price.push({category:'',item:'',badge:'',desc:'',price:''}); renderPrice(); }
 function removePrice(i) { window.D.price.splice(i,1); renderPrice(); }
 
 function renderSample() {
   var el = document.getElementById('sample-items'); el.innerHTML = '';
   (window.D.samples||[]).forEach(function(s,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">샘플 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeSample('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(s.title||'')+'" oninput="window.D.samples['+i+'].title=this.value"></div><div class="field-row"><label>유튜브 URL</label><input type="text" value="'+(s.url||'')+'" placeholder="https://youtu.be/xxxxx" oninput="window.D.samples['+i+'].url=this.value"></div><div class="field-row"><label>이미지 URL (유튜브 대신 사용)</label><input type="text" value="'+(s.thumb||'')+'" placeholder="https://..." oninput="window.D.samples['+i+'].thumb=this.value"></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">샘플 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeSample('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(s.title||'')+'" placeholder="샘플 제목" oninput="window.D.samples['+i+'].title=this.value"></div><div class="field-row"><label>유튜브 URL</label><input type="text" value="'+(s.url||'')+'" placeholder="https://youtu.be/xxxxx" oninput="window.D.samples['+i+'].url=this.value"></div><div class="field-row"><label>이미지 URL (유튜브 대신 사용)</label><input type="text" value="'+(s.thumb||'')+'" placeholder="https://..." oninput="window.D.samples['+i+'].thumb=this.value"></div></div>';
   });
+  if (emptyHint('sample-items', '등록된 샘플이 없어요.')) return;
   initSortable('sample-items','samples',null,renderSample);
 }
-function addSample() { window.D.samples.push({title:'새 샘플',url:'',thumb:''}); renderSample(); }
+function addSample() { window.D.samples.push({title:'',url:'',thumb:''}); renderSample(); }
 function removeSample(i) { window.D.samples.splice(i,1); renderSample(); }
 
 function renderFaq() {
   var el = document.getElementById('faq-items'); el.innerHTML = '';
   (window.D.faq||[]).forEach(function(f,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">Q'+(i+1)+'</span></span><button class="btn btn-red" onclick="removeFaq('+i+')">삭제</button></div><div class="field-row"><label>질문</label><input type="text" value="'+(f.question||'')+'" oninput="window.D.faq['+i+'].question=this.value"></div><div class="field-row"><label>답변</label><textarea oninput="window.D.faq['+i+'].answer=this.value">'+(f.answer||'')+'</textarea></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">Q'+(i+1)+'</span></span><button class="btn btn-red" onclick="removeFaq('+i+')">삭제</button></div><div class="field-row"><label>질문</label><input type="text" value="'+(f.question||'')+'" placeholder="질문" oninput="window.D.faq['+i+'].question=this.value"></div><div class="field-row"><label>답변</label><textarea placeholder="답변" oninput="window.D.faq['+i+'].answer=this.value">'+(f.answer||'')+'</textarea></div></div>';
   });
+  if (emptyHint('faq-items', '등록된 Q&A가 없어요.')) return;
   initSortable('faq-items','faq',null,renderFaq);
 }
-function addFaq() { window.D.faq.push({question:'질문 입력',answer:'답변 입력'}); renderFaq(); }
+function addFaq() { window.D.faq.push({question:'',answer:''}); renderFaq(); }
 function removeFaq(i) { window.D.faq.splice(i,1); renderFaq(); }
 
 function renderRefund() {
   var el = document.getElementById('refund-items'); el.innerHTML = '';
   (window.D.refund.rows||[]).forEach(function(r,i) {
     var types = ['full','partial','none'].map(function(t){ return '<option value="'+t+'"'+(r.type===t?' selected':'')+'>'+{full:'전액환불',partial:'부분환불',none:'환불불가'}[t]+'</option>'; }).join('');
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeRefund('+i+')">삭제</button></div><div class="field-grid3"><div class="field-row"><label>작업 단계</label><input type="text" value="'+(r.stage||'')+'" oninput="window.D.refund.rows['+i+'].stage=this.value"></div><div class="field-row"><label>환불 비율</label><input type="text" value="'+(r.rate||'')+'" oninput="window.D.refund.rows['+i+'].rate=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.refund.rows['+i+'].type=this.value">'+types+'</select></div></div></div>';
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeRefund('+i+')">삭제</button></div><div class="field-grid3"><div class="field-row"><label>작업 단계</label><input type="text" value="'+(r.stage||'')+'" placeholder="작업 단계" oninput="window.D.refund.rows['+i+'].stage=this.value"></div><div class="field-row"><label>환불 비율</label><input type="text" value="'+(r.rate||'')+'" placeholder="전액 환불 / 50% 환불" oninput="window.D.refund.rows['+i+'].rate=this.value"></div><div class="field-row"><label>타입</label><select onchange="window.D.refund.rows['+i+'].type=this.value">'+types+'</select></div></div></div>';
   });
+  if (emptyHint('refund-items', '등록된 단계가 없어요.')) return;
   initSortable('refund-items','refund','rows',renderRefund);
 }
-function addRefund() { window.D.refund.rows.push({stage:'단계명',rate:'환불 비율',type:'partial'}); renderRefund(); }
+function addRefund() { window.D.refund.rows.push({stage:'',rate:'',type:'partial'}); renderRefund(); }
 function removeRefund(i) { window.D.refund.rows.splice(i,1); renderRefund(); }
 </script>
 </body>
