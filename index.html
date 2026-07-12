@@ -1,0 +1,203 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>커미션</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@400;500;700&family=Noto+Serif+KR:wght@400;700&display=swap" rel="stylesheet">
+<style>
+:root {
+  --main:#2f2f33; --deep:#4e4e55; --dark:#3f3f45; --light:#8a8a93;
+  --bg:#f2f2f2; --bg2:#f6f6f6; --border:#bebec1; --text:#5b5b5d; --sub:#88888c;
+  --hero1:#f3f3f4; --hero2:#e1e1e2; --main-rgb:47,47,51;
+}
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html, body { width: 100%; font-family: 'Noto Sans KR', sans-serif; color: #0a1e0e; line-height: 1.6; overflow-x: hidden; }
+body { background: linear-gradient(165deg, var(--hero1) 0%, var(--hero2) 45%, var(--hero1) 100%); min-height: 100vh; opacity: 0; transition: opacity 0.35s ease; }
+body.ready { opacity: 1; }
+
+.hub { max-width: 1120px; margin: 0 auto; padding: 72px 40px 64px; text-align: center; position: relative; }
+.hub-badge { display: inline-block; background: var(--main); color: #fff; font-size: 12px; font-weight: 700; letter-spacing: 3px; padding: 6px 20px; border-radius: 999px; margin-bottom: 20px; }
+.hub-title { font-family: 'Noto Serif KR', serif; font-size: 42px; font-weight: 700; color: var(--dark); letter-spacing: -1px; margin-bottom: 10px; }
+.hub-sub { font-size: 15px; color: var(--text); line-height: 2; margin-bottom: 44px; white-space: pre-line; }
+
+.card-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 24px; }
+.card {
+  --c: var(--main);
+  display: flex; flex-direction: column;
+  background: rgba(255,255,255,0.78);
+  border: 1px solid rgba(255,255,255,0.9);
+  border-radius: 18px;
+  box-shadow: 0 6px 24px rgba(0,0,0,0.05);
+  text-decoration: none; cursor: pointer;
+  transition: transform 0.18s ease, box-shadow 0.18s ease, background 0.18s ease;
+  position: relative; overflow: hidden;
+}
+.card:hover { transform: translateY(-5px); box-shadow: 0 14px 34px rgba(0,0,0,0.1); background: #fff; }
+.card-media { position: relative; width: 100%; aspect-ratio: 16 / 10; background: var(--hero2); overflow: hidden; }
+.card-media img, .card-media video { width: 100%; height: 100%; object-fit: cover; display: block; transition: transform 0.35s ease; }
+.card:hover .card-media img, .card:hover .card-media video { transform: scale(1.05); }
+.card-media-empty { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; background: linear-gradient(140deg, var(--hero1), var(--hero2)); }
+.card-media-empty span { width: 14px; height: 14px; border-radius: 50%; background: var(--c); opacity: 0.5; }
+.card-body { padding: 16px 20px 20px; text-align: left; position: relative; }
+.card-name { font-size: 17px; font-weight: 700; color: var(--dark); display: flex; align-items: center; gap: 7px; }
+.card-arrow { color: var(--c); font-size: 14px; transition: transform 0.18s ease; }
+.card:hover .card-arrow { transform: translate(3px, -3px); }
+.card-desc { font-size: 13px; color: var(--sub); margin-top: 6px; word-break: keep-all; line-height: 1.6; }
+.card-bar { height: 4px; background: var(--c); }
+
+.hub-footer { margin-top: 52px; font-size: 12px; color: var(--sub); line-height: 2; white-space: pre-line; }
+.hub-empty { background: rgba(255,255,255,0.7); border: 1px dashed var(--border); border-radius: 16px; padding: 40px; color: var(--sub); font-size: 14px; }
+
+@media (max-width: 768px) {
+  .hub { padding: 48px 20px 44px; }
+  .hub-title { font-size: 28px; }
+  .hub-sub { font-size: 13px; margin-bottom: 30px; }
+  .card-grid { grid-template-columns: 1fr; gap: 14px; }
+  .card { min-height: 120px; padding: 26px 20px; }
+  .card-name { font-size: 17px; }
+}
+</style>
+</head>
+<body>
+<div class="hub">
+  <div class="hub-badge" id="hub-badge" style="display:none;"></div>
+  <div class="hub-title" id="hub-title">커미션</div>
+  <div class="hub-sub" id="hub-sub"></div>
+  <div class="card-grid" id="card-grid">
+    <div class="hub-empty">불러오는 중...</div>
+  </div>
+  <div class="hub-footer" id="hub-footer"></div>
+</div>
+
+<script type="module">
+import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
+import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+
+/* ============================================================
+   ★★★ 새 Firebase 프로젝트를 쓸 때는 이 부분만 교체하세요 ★★★
+   ============================================================ */
+const firebaseConfig = {
+  apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
+  authDomain: "jiyul-commission-2e306.firebaseapp.com",
+  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
+  projectId: "jiyul-commission-2e306",
+  storageBucket: "jiyul-commission-2e306.firebasestorage.app",
+  messagingSenderId: "348428402333",
+  appId: "1:348428402333:web:d1c5a1049618bf8cd61e74"
+};
+/* ============================================================ */
+
+const app = initializeApp(firebaseConfig);
+const db = getDatabase(app);
+
+/* 메인 컬러 → 팔레트 (site.html 과 동일) */
+function hexToHsl(hex) {
+  hex = (hex || '#2f2f33').replace('#','');
+  if (hex.length === 3) hex = hex[0]+hex[0]+hex[1]+hex[1]+hex[2]+hex[2];
+  const r = parseInt(hex.substr(0,2),16)/255, g = parseInt(hex.substr(2,2),16)/255, b = parseInt(hex.substr(4,2),16)/255;
+  const max = Math.max(r,g,b), min = Math.min(r,g,b);
+  let h = 0, s = 0; const l = (max+min)/2; const d = max-min;
+  if (d) {
+    s = l > 0.5 ? d/(2-max-min) : d/(max+min);
+    if (max === r) h = ((g-b)/d + (g < b ? 6 : 0));
+    else if (max === g) h = (b-r)/d + 2;
+    else h = (r-g)/d + 4;
+    h *= 60;
+  }
+  return { h: h, s: s, l: l };
+}
+function hslToHex(h, s, l) {
+  s = Math.max(0, Math.min(1, s)); l = Math.max(0, Math.min(1, l));
+  const c = (1 - Math.abs(2*l - 1)) * s, x = c * (1 - Math.abs((h/60) % 2 - 1)), m = l - c/2;
+  let r=0,g=0,b=0;
+  if (h < 60)      { r=c; g=x; }
+  else if (h<120)  { r=x; g=c; }
+  else if (h<180)  { g=c; b=x; }
+  else if (h<240)  { g=x; b=c; }
+  else if (h<300)  { r=x; b=c; }
+  else             { r=c; b=x; }
+  const to = v => Math.round((v+m)*255).toString(16).padStart(2,'0');
+  return '#' + to(r) + to(g) + to(b);
+}
+function applyTheme(base) {
+  const c = hexToHsl(base), h = c.h, s = c.s;
+  const p = {
+    main: base,
+    deep:   hslToHex(h, Math.min(1, s*1.05), 0.32),
+    dark:   hslToHex(h, Math.min(1, s*1.05), 0.26),
+    light:  hslToHex(h, Math.min(1, s*0.95), 0.56),
+    bg:     hslToHex(h, s*0.45, 0.95),
+    bg2:    hslToHex(h, s*0.35, 0.965),
+    border: hslToHex(h, s*0.50, 0.75),
+    text:   hslToHex(h, s*0.30, 0.36),
+    sub:    hslToHex(h, s*0.40, 0.54),
+    hero1:  hslToHex(h, s*0.45, 0.955),
+    hero2:  hslToHex(h, s*0.50, 0.885)
+  };
+  Object.keys(p).forEach(k => document.documentElement.style.setProperty('--' + k, p[k]));
+}
+
+const esc = t => String(t || '').replace(/[<>&"]/g, c => ({'<':'&lt;','>':'&gt;','&':'&amp;','"':'&quot;'}[c]));
+
+/* 미리보기 미디어 — 이미지 / GIF / 영상 / 유튜브 자동 판별 */
+function ytId(u) {
+  const m = String(u || '').match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
+  return m ? m[1] : null;
+}
+const isVideo = u => /^data:video\//.test(u) || /\.(mp4|webm|mov)(\?|$)/i.test(u);
+function mediaTag(u) {
+  if (!u) return '<div class="card-media-empty"><span></span></div>';
+  const y = ytId(u);
+  if (y) return '<img src="https://img.youtube.com/vi/' + y + '/hqdefault.jpg" alt="" loading="lazy">';
+  if (isVideo(u)) return '<video src="' + esc(u) + '" autoplay muted loop playsinline></video>';
+  return '<img src="' + esc(u) + '" alt="" loading="lazy">';
+}
+
+let hub = {}, sites = {};
+function render() {
+  applyTheme(hub.color || '#2f2f33');
+  document.title = hub.page_title || hub.title || '커미션';
+
+  const badge = document.getElementById('hub-badge');
+  badge.textContent = hub.badge || '';
+  badge.style.display = hub.badge ? '' : 'none';
+  document.getElementById('hub-title').textContent = hub.title || '커미션';
+  document.getElementById('hub-sub').textContent = hub.subtitle || '';
+  document.getElementById('hub-footer').textContent = hub.footer || '';
+
+  const keys = Object.keys(sites)
+    .filter(k => sites[k] && sites[k].visible !== false && sites[k].published !== false)
+    .sort((a, b) => (sites[a].order || 0) - (sites[b].order || 0) || a.localeCompare(b));
+
+  const grid = document.getElementById('card-grid');
+  if (!keys.length) {
+    grid.innerHTML = '<div class="hub-empty">아직 등록된 커미션이 없어요.<br>init.html 에서 커미션을 추가해 주세요.</div>';
+  } else {
+    grid.innerHTML = keys.map(k => {
+      const s = sites[k];
+      const desc = s.desc ? '<div class="card-desc">' + esc(s.desc) + '</div>' : '';
+      return '<a class="card" style="--c:' + esc(s.color || '#2f2f33') + '" href="site.html?site=' + esc(k) + '">' +
+               '<div class="card-bar"></div>' +
+               '<div class="card-media">' + mediaTag(s.preview) + '</div>' +
+               '<div class="card-body">' +
+                 '<div class="card-name">' + esc(s.name || k) + '<span class="card-arrow">↗</span></div>' +
+                 desc +
+               '</div>' +
+             '</a>';
+    }).join('');
+  }
+  document.body.classList.add('ready');
+  window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+}
+
+let loadedHub = false, loadedSites = false;
+onValue(ref(db, '_hub'), snap => { hub = snap.val() || {}; loadedHub = true; if (loadedSites) render(); });
+onValue(ref(db, '_sites'), snap => { sites = snap.val() || {}; loadedSites = true; if (loadedHub) render(); });
+
+// DB 응답이 없어도 3초 뒤엔 표시
+setTimeout(function() { if (!document.body.classList.contains('ready')) render(); }, 3000);
+</script>
+</body>
+</html>
