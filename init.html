@@ -23,7 +23,7 @@ select, input[type=text] { width: 100%; padding: 10px 14px; border: 1px solid #d
 <body>
 <div class="wrap">
   <h2>🌱 커미션 초기 데이터 업로드</h2>
-  <p class="desc">한 Firebase 프로젝트 안에서 <b>사이트 키</b> 하나당 커미션 사이트 하나가 만들어집니다.<br>모든 칸은 <b>무엇을 적어야 하는지 설명하는 가이드 문구</b>로 채워져요.<br>업로드 후 <b>admin.html?site=키</b> 에서 하나씩 덮어쓰면 됩니다.</p>
+  <p class="desc">한 Firebase 프로젝트 안에서 <b>사이트 키</b> 하나당 커미션 사이트 하나가 만들어집니다.<br>내용은 <b>모두 비어 있는 상태</b>로 생성돼요.<br>업로드 후 <b>admin.html?site=키</b> 에서 채워 넣으면 됩니다.</p>
   <div class="warn">⚠️ 같은 사이트 키로 다시 실행하면 <b>그 사이트의 기존 데이터가 전부 덮어써집니다.</b><br>운영 중인 사이트의 키로는 절대 실행하지 마세요!</div>
 
   <label>관리자 로그인</label>
@@ -50,13 +50,13 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
    ★★★ 새 커미션 사이트를 만들 때는 이 부분만 교체하세요 ★★★
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
-  authDomain: "jiyul-commission-2e306.firebaseapp.com",
-  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
-  projectId: "jiyul-commission-2e306",
-  storageBucket: "jiyul-commission-2e306.firebasestorage.app",
-  messagingSenderId: "348428402333",
-  appId: "1:348428402333:web:d1c5a1049618bf8cd61e74"
+  apiKey: "AIzaSyDJemQYxfZ-xNLM91I9kXe_KBW1KxSCpHQ",
+  authDomain: "jiyul-commission.firebaseapp.com",
+  databaseURL: "https://jiyul-commission-default-rtdb.firebaseio.com",
+  projectId: "jiyul-commission",
+  storageBucket: "jiyul-commission.firebasestorage.app",
+  messagingSenderId: "732523553497",
+  appId: "1:732523553497:web:e0d0ae68ed4619795f54c8"
 };
 /* ============================================================ */
 
@@ -64,98 +64,34 @@ const app = initializeApp(firebaseConfig);
 const db = getDatabase(app);
 const auth = getAuth(app);
 
+/* 섹션 제목은 기본값을 넣고, 나머지 내용은 전부 비워둡니다.
+   각 입력칸의 힌트 문구는 admin.html 에서 안내됩니다. */
 const SECTIONS = {
-  notice:  { visible: true,  title: '공지사항',
-             subtitle: '[섹션 부제] 이 줄은 제목 아래 작게 표시돼요. 비워둬도 됩니다.' },
-  status:  { visible: true,  title: '예약 현황',
-             subtitle: '[섹션 부제] 예: 현재 작업 가능 여부를 확인하세요' },
-  process: { visible: true,  title: '진행 방식',
-             subtitle: '[섹션 부제] 예: 주문 전 반드시 아래 순서를 확인해 주세요' },
-  collab:  { visible: false, title: '협업 작가',
-             subtitle: '[섹션 부제] 협업 작가가 없다면 이 섹션은 꺼두세요' },
-  price:   { visible: true,  title: '가격표',
-             subtitle: '[섹션 부제] 예: 정확한 금액은 문의 후 안내드립니다',
-             head1: '작업 항목', head2: '포함 내용', head3: '가격',
-             note: '[가격표 아래 안내문] 추가금 기준, 결제 방법, 견적 안내 등을 적어주세요.\n줄바꿈하면 그대로 반영됩니다. 필요 없으면 비워두세요.' },
-  sample:  { visible: true,  title: '포트폴리오 · 샘플',
-             subtitle: '[섹션 부제] 예: 작업물 샘플 — 문의 시 추가 포폴 공유 가능' },
-  faq:     { visible: true,  title: '자주 묻는 질문',
-             subtitle: '[섹션 부제] 예: 문의 전 확인해 주세요' },
-  refund:  { visible: true,  title: '환불 정책',
-             subtitle: '[섹션 부제] 예: 작업 의뢰 전 필독해 주세요',
+  notice:  { visible: true,  title: '공지사항',          subtitle: '' },
+  status:  { visible: true,  title: '예약 현황',          subtitle: '' },
+  process: { visible: true,  title: '진행 방식',          subtitle: '' },
+  collab:  { visible: false, title: '협업 작가',          subtitle: '' },
+  price:   { visible: true,  title: '가격표',             subtitle: '',
+             head1: '작업 항목', head2: '포함 내용', head3: '가격', note: '' },
+  sample:  { visible: true,  title: '포트폴리오 · 샘플',  subtitle: '' },
+  faq:     { visible: true,  title: '자주 묻는 질문',     subtitle: '' },
+  refund:  { visible: true,  title: '환불 정책',          subtitle: '',
              head1: '작업 단계', head2: '환불 비율' }
 };
 
-const GUIDE = {
+const EMPTY = {
   site: {
-    page_title: '[브라우저 탭 제목] 예: 지율 커미션 — Live2D 리깅',
-    badge: '[상단 배지] 짧은 영문 문구를 권해요. 예: LIVE2D RIGGING ARTIST',
-    name: '[메인 타이틀] 커미션 이름을 적어주세요',
-    en: '[영문 타이틀] 예: JIYUL COMMISSION',
-    desc: '[소개문] 어떤 작업을 하는지 한두 줄로 적어주세요.\n줄바꿈하면 그대로 반영됩니다.',
-    tags: ['태그1', '태그2', '태그3'],
-    footer_name: '[푸터 제목] 보통 커미션 이름을 넣어요',
-    footer_body: '[푸터 내용] 문의 경로나 SNS를 안내해 주세요.\n예: 문의는 아트머그 내 문의하기를 통해 남겨주세요',
-    footer_warn: '[푸터 경고문] 예: ※ 모든 이미지는 저작권이 있는 이미지입니다. 무단 도용 및 복제를 금합니다.'
+    page_title: '', badge: '', name: '', en: '', desc: '', tags: [],
+    footer_name: '', footer_body: '', footer_warn: ''
   },
-  notice: {
-    answer_time: '[답변 시간] 예: 매일 오후 12시 ~ 오후 11시 (비우면 표시 안 됨)',
-    items: [
-      { icon: '🚫', type: 'warn', title: '[경고 공지 제목]',
-        body: '타입을 "경고(빨강)"로 하면 이렇게 붉은 카드로 표시돼요.\n환불 불가, 필수 확인사항 같은 중요한 내용에 쓰세요.' },
-      { icon: '⚙️', type: 'normal', title: '[공지 제목]',
-        body: '작업 범위, 포함/미포함 항목 등을 적어주세요.\n줄바꿈은 그대로 반영됩니다.' },
-      { icon: '📄', type: 'normal', title: '[공지 제목]',
-        body: '저작권, 사용 범위, 할인 안내 등\n손님이 꼭 알아야 할 내용을 카드로 나눠 적어주세요.\n카드는 관리자에서 자유롭게 추가·삭제·순서변경할 수 있어요.' }
-    ]
-  },
-  status: [
-    { label: '[상태 이름] 예: 접수중', type: 'open', desc: '[한 줄 설명] 초록 카드로 표시돼요' },
-    { label: '[상태 이름] 예: 대기 중', type: 'wait', desc: '[한 줄 설명] 노란 카드로 표시돼요' },
-    { label: '[상태 이름] 예: 마감', type: 'closed', desc: '[한 줄 설명] 회색 카드로 표시돼요' }
-  ],
-  process: [
-    { title: '[1단계 제목] 예: 문의 & 견적 확인',
-      body: '이 단계에서 손님이 무엇을 해야 하는지 적어주세요.\n단계는 관리자에서 추가·삭제·순서변경이 가능하고 번호는 자동으로 매겨집니다.' },
-    { title: '[2단계 제목] 예: 주문 & 결제', body: '결제 방법과 주의사항을 적어주세요.' },
-    { title: '[3단계 제목] 예: 자료 제출', body: '손님이 보내야 할 파일·자료 형식을 적어주세요.' },
-    { title: '[4단계 제목] 예: 작업 & 중간 확인', body: '피드백 방식, 수정 범위를 적어주세요.' },
-    { title: '[5단계 제목] 예: 납품', body: '납품 형식과 이후 지원 내용을 적어주세요.' }
-  ],
-  price: [
-    { category: '[카테고리] 같은 이름끼리 묶여서 회색 줄로 표시돼요',
-      item: '[항목명]', badge: '[배지] 항목명 옆 작은 라벨. 비워도 됨',
-      desc: '[포함 내용] 이 금액에 무엇이 포함되는지', price: '[가격] 예: 협의 / 50,000원' },
-    { category: '[카테고리] 예: 추가 옵션',
-      item: '[항목명]', badge: '',
-      desc: '[포함 내용]', price: '[가격] 예: +협의' }
-  ],
-  samples: [
-    { title: '[샘플 제목]', url: '', thumb: '' },
-    { title: '[샘플 제목] 유튜브 URL 또는 이미지 URL을 넣어주세요', url: '', thumb: '' }
-  ],
-  faq: [
-    { question: '[질문] 자주 받는 질문을 적어주세요',
-      answer: '[답변] 답변을 적어주세요. 관리자에서 항목을 추가·삭제할 수 있어요.' },
-    { question: '[질문]', answer: '[답변]' }
-  ],
-  collab: {
-    visible: false,
-    items: [
-      { image: '', name: '[작가명]', link: '',
-        main_desc: '[협업 혜택] 예: 일러스트 + 리깅 패키지 할인',
-        sub_desc: '[설명] 어떤 작업을 함께 하는지 적어주세요' }
-    ]
-  },
-  refund: {
-    intro: '[환불 정책 소개] 환불 기준을 문단으로 적어주세요.\n예: 작가가 통보 없이 작업기간을 넘길 경우 전액 환불해드립니다.\n줄바꿈은 그대로 반영됩니다.',
-    rows: [
-      { stage: '[작업 단계] 예: 작업 시작 전', rate: '[환불 비율] 예: 전액 환불', type: 'full' },
-      { stage: '[작업 단계] 예: 초안 작업 중', rate: '[환불 비율] 예: 70% 환불', type: 'partial' },
-      { stage: '[작업 단계] 예: 본작업 진행', rate: '[환불 비율] 예: 50% 환불', type: 'partial' },
-      { stage: '[작업 단계] 예: 50% 이상 진행', rate: '[환불 비율] 예: 환불 불가', type: 'none' }
-    ]
-  }
+  notice: { answer_time: '', items: [] },
+  status: [],
+  process: [],
+  price: [],
+  samples: [],
+  faq: [],
+  collab: { visible: false, items: [] },
+  refund: { intro: '', rows: [] }
 };
 
 window.run = function() {
@@ -164,19 +100,19 @@ window.run = function() {
   if (!siteKey) { alert('사이트 키를 입력해 주세요.'); return; }
   if (!confirm('"' + siteKey + '" 사이트의 기존 데이터를 덮어씁니다. 계속할까요?')) return;
 
-  const g = JSON.parse(JSON.stringify(GUIDE));
+  const e = JSON.parse(JSON.stringify(EMPTY));
   const data = {
-    site: g.site,
+    site: e.site,
     theme: { main: color },
     sections: JSON.parse(JSON.stringify(SECTIONS)),
-    notice: g.notice,
-    status: g.status,
-    process: g.process,
-    price: g.price,
-    samples: g.samples,
-    faq: g.faq,
-    collab: g.collab,
-    refund: g.refund
+    notice: e.notice,
+    status: e.status,
+    process: e.process,
+    price: e.price,
+    samples: e.samples,
+    faq: e.faq,
+    collab: e.collab,
+    refund: e.refund
   };
 
   const btn = document.getElementById('go');
@@ -189,7 +125,7 @@ window.run = function() {
       btn.textContent = '업로드 중...';
       return Promise.all([
         set(ref(db, siteKey), data),
-        set(ref(db, '_sites/' + siteKey), { name: data.site.name, color: color, desc: '[카드 한 줄 설명] 허브 카드에 표시돼요', order: 99, visible: true, preview: '' })
+        set(ref(db, '_sites/' + siteKey), { name: siteKey, color: color, desc: '', order: 99, visible: true, preview: '' })
       ]);
     })
     .then(function() {
