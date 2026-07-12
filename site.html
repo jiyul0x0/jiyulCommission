@@ -277,7 +277,7 @@ const db = getDatabase(app);
 
 /* 여러 커미션을 한 Firebase에서 운영 — URL ?site=키 로 구분
    예) site.html?site=illust  →  DB의 illust 노드를 읽음
-   파라미터가 없으면 commission 노드 (기존 리깅 사이트) */
+   파라미터가 없으면 commission 노드를 읽습니다. */
 const SITE_KEY = (new URLSearchParams(location.search).get('site') || 'commission').replace(/[^a-zA-Z0-9_-]/g, '');
 const STATUS_ICONS = { open: '✅', wait: '⏳', closed: '🚫' };
 
