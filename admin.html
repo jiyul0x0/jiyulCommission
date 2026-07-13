@@ -265,11 +265,27 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
   <div class="admin-section">
     <div class="admin-section-title">📝 9. 신청 양식</div>
     <div class="hint" style="margin-bottom:14px;">방문자가 작성 후 <b>복사하기</b>로 문의처에 붙여넣는 양식이에요. 서버로 전송되지 않습니다.</div>
+    <div class="field-row" style="display:flex;align-items:center;gap:10px;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:10px;">
+      <input type="checkbox" id="apply-quote" style="width:18px;height:18px;cursor:pointer;">
+      <label style="margin:0;">견적 계산기 표시</label>
+      <span class="hint" style="margin:0;">위 <b>가격표</b>의 항목을 카테고리별로 불러와 수량·합계를 계산해요. 가격에 숫자가 없는 항목(협의 등)은 수량 입력이 비활성화됩니다.</span>
+    </div>
     <div class="field-row"><label>양식 안내문</label><textarea id="apply-intro" placeholder="작성 방법이나 필수 준비물을 안내해 주세요"></textarea></div>
     <div class="field-row"><label>동의 문구</label><input type="text" id="apply-agree" placeholder="비워두면 동의 체크박스가 표시되지 않아요"></div>
     <label style="margin-bottom:10px;">양식 항목</label>
     <div id="apply-items"></div>
     <button class="btn btn-green" onclick="addApply()" style="margin-top:8px;">+ 항목 추가</button>
+
+    <div style="margin-top:28px;padding-top:22px;border-top:1px dashed #d4d4d6;">
+      <label>💰 견적 계산 (가격표 연동)</label>
+      <div class="hint" style="margin-bottom:14px;">
+        위 <b>5. 가격표</b>에 입력한 항목이 그대로 나옵니다. 항목마다 역할을 정해주세요.<br>
+        <b>기본 포함</b> = 항상 합계에 포함 (필수) · <b>선택 (체크)</b> = 켜고 끄는 옵션 ·
+        <b>선택 (수량)</b> = 개수만큼 곱해지는 옵션 · <b>사용 안 함</b> = 견적에서 제외<br>
+        가격에 숫자가 없으면(예: <b>협의</b>) 합계에 더하지 않고 <b>문의 필요</b>로 표시됩니다.
+      </div>
+      <div id="apply-price-opts"></div>
+    </div>
   </div>
 
   <div class="admin-section" style="border-color:#e8a0a0;">
@@ -585,8 +601,10 @@ window.seedDefaults = function() {
   if (!D.collab.items) D.collab.items = [];
   if (!D.refund) D.refund = { intro: '', rows: [] };
   if (!D.refund.rows) D.refund.rows = [];
-  if (!D.apply) D.apply = { intro: '', agree: '', fields: [] };
+  if (!D.apply) D.apply = { intro: '', agree: '', quote: true, fields: [] };
   if (!D.apply.fields) D.apply.fields = [];
+  if (D.apply.quote === undefined) D.apply.quote = true;
+  if (!D.apply.priceOpts) D.apply.priceOpts = {};
 };
 
 /* ---------- 입력값 → window.D ---------- */
@@ -599,6 +617,9 @@ window.collectInputs = function() {
   D.refund.intro = document.getElementById('refund-intro').value;
   D.apply.intro = document.getElementById('apply-intro').value;
   D.apply.agree = document.getElementById('apply-agree').value;
+  D.apply.quote = document.getElementById('apply-quote').checked;
+  D.apply.quote_note = document.getElementById('apply-quote_note').value;
+  D.apply.quote = document.getElementById('apply-quote').checked;
   D.sections.price.head1 = document.getElementById('price-head1').value;
   D.sections.price.head2 = document.getElementById('price-head2').value;
   D.sections.price.head3 = document.getElementById('price-head3').value;
@@ -616,6 +637,9 @@ window.renderAll = function() {
   document.getElementById('refund-intro').value = D.refund.intro || '';
   document.getElementById('apply-intro').value = D.apply.intro || '';
   document.getElementById('apply-agree').value = D.apply.agree || '';
+  document.getElementById('apply-quote').checked = D.apply.quote !== false;
+  document.getElementById('apply-quote_note').value = D.apply.quote_note || '';
+  document.getElementById('apply-quote').checked = D.apply.quote !== false;
   document.getElementById('price-head1').value = D.sections.price.head1;
   document.getElementById('price-head2').value = D.sections.price.head2;
   document.getElementById('price-head3').value = D.sections.price.head3;
@@ -628,7 +652,7 @@ window.renderAll = function() {
   renderTheme();
   renderSections();
   renderNotice(); renderStatus(); renderProcess();
-  renderCollab(); renderPrice(); renderSample(); renderFaq(); renderRefund(); renderApply();
+  renderCollab(); renderPrice(); renderSample(); renderFaq(); renderRefund(); renderApply(); renderPriceOpts();
 };
 
 function syncPreview() {
@@ -850,8 +874,8 @@ function renderPrice() {
   if (emptyHint('price-items', '등록된 항목이 없어요.')) return;
   initSortable('price-items','price',null,renderPrice);
 }
-function addPrice() { window.D.price.push({category:'',item:'',badge:'',desc:'',price:''}); renderPrice(); }
-function removePrice(i) { window.D.price.splice(i,1); renderPrice(); }
+function addPrice() { window.D.price.push({category:'',item:'',badge:'',desc:'',price:''}); renderPrice(); renderPriceOpts(); }
+function removePrice(i) { window.D.price.splice(i,1); renderPrice(); renderPriceOpts(); }
 
 function renderSample() {
   var el = document.getElementById('sample-items'); el.innerHTML = '';
@@ -887,6 +911,7 @@ function renderRefund() {
 function addRefund() { window.D.refund.rows.push({stage:'',rate:'',type:'partial'}); renderRefund(); }
 
 var APPLY_TYPES = { text: '한 줄 입력', textarea: '여러 줄 입력', select: '선택 (1개)', multi: '선택 (여러 개)' };
+// '선택 (여러 개)' 항목은 페이지에서 제목 옆에 '(복수 선택 가능)' 이 자동 표시됩니다.
 function renderApply() {
   var el = document.getElementById('apply-items'); el.innerHTML = '';
   (window.D.apply.fields || []).forEach(function(f, i) {
@@ -907,7 +932,7 @@ function renderApply() {
           '<div class="field-row"><label>질문</label><input type="text" value="' + (f.label || '') + '" placeholder="질문 / 항목 이름" oninput="window.D.apply.fields[' + i + '].label=this.value"></div>' +
           '<div class="field-row"><label>입력 방식</label><select onchange="setApplyType(' + i + ', this.value)">' + types + '</select></div>' +
         '</div>' +
-        extra +
+        extra + multiNote +
         '<div class="field-row"><label>보조 설명</label><input type="text" value="' + (f.hint || '') + '" placeholder="항목 아래 작게 표시될 설명 (선택)" oninput="window.D.apply.fields[' + i + '].hint=this.value"></div>' +
       '</div>';
   });
@@ -923,6 +948,42 @@ function setApplyType(i, v) {
 function setApplyOptions(i, v) {
   window.D.apply.fields[i].options = v.split(',').map(function(t) { return t.trim(); }).filter(Boolean);
 }
+var PRICE_MODES = { hidden: '사용 안 함', base: '기본 포함 (필수)', check: '선택 (체크)', qty: '선택 (수량)' };
+function priceKey(p) { return (p.category || '') + '§' + (p.item || ''); }
+function renderPriceOpts() {
+  var el = document.getElementById('apply-price-opts');
+  if (!el) return;
+  var list = window.D.price || [];
+  if (!list.length) {
+    el.innerHTML = '<div class="hint" style="padding:14px 0;">가격표에 항목이 없어요. 위 <b>5. 가격표</b>에서 먼저 추가해 주세요.</div>';
+    return;
+  }
+  var opts = window.D.apply.priceOpts;
+  var lastCat = '';
+  var html = '';
+  list.forEach(function(p) {
+    var k = priceKey(p);
+    if (opts[k] === undefined) opts[k] = 'hidden';
+    if (p.category && p.category !== lastCat) {
+      html += '<div class="hint" style="margin:14px 0 8px;font-weight:700;color:var(--dark);">' + p.category + '</div>';
+      lastCat = p.category;
+    }
+    var sel = Object.keys(PRICE_MODES).map(function(m) {
+      return '<option value="' + m + '"' + (opts[k] === m ? ' selected' : '') + '>' + PRICE_MODES[m] + '</option>';
+    }).join('');
+    var amount = String(p.price || '').replace(/,/g, '').match(/\d+/);
+    var tag = amount ? '' : '<span class="hint" style="margin:0;">· 문의 필요로 표시</span>';
+    html += '<div class="sec-row" style="grid-template-columns:1fr 170px auto;">' +
+      '<div><b style="font-size:13px;color:var(--dark);">' + (p.item || '(이름 없음)') + '</b>' +
+      '<div class="hint" style="margin:2px 0 0;">' + (p.price || '가격 미입력') + '</div></div>' +
+      '<select onchange="setPriceMode(\'' + k.replace(/'/g, "\\'") + '\', this.value)">' + sel + '</select>' +
+      tag +
+      '</div>';
+  });
+  el.innerHTML = html;
+}
+function setPriceMode(k, v) { window.D.apply.priceOpts[k] = v; }
+
 function addApply() { window.D.apply.fields.push({ label:'', type:'text', placeholder:'', hint:'' }); renderApply(); }
 function removeApply(i) { window.D.apply.fields.splice(i,1); renderApply(); }
 function removeRefund(i) { window.D.refund.rows.splice(i,1); renderRefund(); }
