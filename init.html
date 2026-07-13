@@ -48,7 +48,7 @@ select, input[type=text] { width: 100%; padding: 10px 14px; border: 1px solid #d
 
 <script type="module">
 import { initializeApp } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js';
-import { getDatabase, ref, set } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
+import { getDatabase, ref, set, get } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-database.js';
 import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/firebasejs/10.12.0/firebase-auth.js';
 
 /* ============================================================
@@ -57,7 +57,7 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
 const firebaseConfig = {
   apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
   authDomain: "jiyul-commission-2e306.firebaseapp.com",
-  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
+  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com",
   projectId: "jiyul-commission-2e306",
   storageBucket: "jiyul-commission-2e306.firebasestorage.app",
   messagingSenderId: "348428402333",
@@ -105,7 +105,6 @@ window.run = function() {
   const color = document.getElementById('color').value.trim() || '#2f2f33';
   const siteKey = document.getElementById('key').value.trim().replace(/[^a-zA-Z0-9_-]/g, '');
   if (!siteKey) { alert('사이트 키를 입력해 주세요.'); return; }
-  if (!confirm('"' + siteKey + '" 사이트의 기존 데이터를 덮어씁니다. 계속할까요?')) return;
 
   const e = JSON.parse(JSON.stringify(EMPTY));
   const data = {
@@ -130,6 +129,24 @@ window.run = function() {
 
   signInWithEmailAndPassword(auth, email, pw)
     .then(function() {
+      btn.textContent = '확인 중...';
+      return get(ref(db, siteKey));
+    })
+    .then(function(snap) {
+      // 이미 존재하는 사이트 → 실수로 덮어쓰지 않도록 이중 확인
+      if (snap.exists()) {
+        const typed = prompt(
+          '⚠️ "' + siteKey + '" 사이트가 이미 존재합니다.\n' +
+          '계속하면 그 커미션의 모든 내용이 빈 상태로 초기화되며 되돌릴 수 없습니다.\n\n' +
+          '그래도 진행하려면 아래에 DELETE 를 입력하세요.\n' +
+          '(취소하려면 그냥 확인을 누르세요)'
+        );
+        if (typed !== 'DELETE') {
+          throw new Error('__cancel__');
+        }
+      } else if (!confirm('"' + siteKey + '" 사이트를 새로 만듭니다. 계속할까요?')) {
+        throw new Error('__cancel__');
+      }
       btn.textContent = '업로드 중...';
       return Promise.all([
         set(ref(db, siteKey), data),
@@ -145,6 +162,10 @@ window.run = function() {
     })
     .catch(function(e) {
       btn.disabled = false; btn.textContent = '🚀 업로드 실행';
+      if (e.message === '__cancel__') {
+        document.getElementById('status').innerHTML = '<span style="color:#88888c;">취소했어요. 기존 데이터는 그대로입니다.</span>';
+        return;
+      }
       var msg = e.message;
       if (e.code === 'auth/invalid-credential') msg = '이메일 또는 비밀번호가 올바르지 않아요.';
       else if (e.code === 'auth/configuration-not-found') msg = 'Firebase 콘솔 → Authentication → 시작하기 를 먼저 눌러 인증을 활성화해 주세요.';
