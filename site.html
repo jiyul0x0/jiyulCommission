@@ -178,7 +178,6 @@ body.ready { opacity: 1; }
 }
 
 /* 신청 양식 — 견적 계산기 */
-.quote-wrap { margin-bottom: 30px; }
 .quote-cat { margin-bottom: 22px; }
 .quote-cat-name { font-size: 13px; font-weight: 700; color: var(--sub); letter-spacing: 1px; padding: 9px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 4px; }
 .quote-head { display: grid; grid-template-columns: 1fr 110px 88px; gap: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--sub); border-bottom: 1px solid var(--bg2); }
@@ -387,8 +386,6 @@ body.ready { opacity: 1; }
     <div class="section-title" id="t-apply">신청 양식</div>
     <div class="section-subtitle" id="s-apply"></div>
     <div class="apply-intro" id="apply-intro"></div>
-    <div class="quote-block" id="apply-quote" style="display:none;"></div>
-    <div class="qnote" id="apply-qnote" style="display:none;">※ 최종 금액은 문의 후 확정됩니다.</div>
     <div class="apply-fields" id="apply-fields"></div>
     <div class="quote-wrap" id="quote-wrap" style="display:none;">
       <div class="quote-head">💰 옵션 선택 &amp; 예상 견적</div>
@@ -926,16 +923,6 @@ document.getElementById('apply-reset').addEventListener('click', function() {
   });
   document.querySelectorAll('#quote-options input[type=checkbox]').forEach(function(c) { c.checked = false; });
   if (QUOTE.length) calcQuote();
-  QUOTE_ROWS.forEach(function(r) {
-    const el = document.getElementById('qty-' + r.i);
-    if (el) el.value = 0;
-  });
-  calcTotal();
-  QUOTE_ROWS.forEach(function(r, i) {
-    const el = document.getElementById('qq-' + i);
-    if (el) el.value = 0;
-  });
-  if (typeof window.calcQuote === 'function') window.calcQuote();
   const ag = document.getElementById('apply-agree');
   if (ag) ag.checked = false;
   applyToast('초기화됐어요.');
