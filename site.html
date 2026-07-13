@@ -150,13 +150,10 @@ body.ready { opacity: 1; }
 .refund-none    { color: #c03030; font-weight: 700; }
 
 /* 견적 계산기 */
-.quote-block { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 28px; }
 .quote-cat { font-size: 12px; font-weight: 700; color: var(--sub); background: var(--bg); padding: 10px 18px; letter-spacing: 1px; border-bottom: 1px solid var(--bg2); }
 .qhead { display: grid; grid-template-columns: 1fr 110px 90px; gap: 8px; background: var(--bg2); padding: 11px 18px; font-size: 12px; font-weight: 700; color: var(--dark); }
 .qhead div:nth-child(2) { text-align: right; }
 .qhead div:nth-child(3) { text-align: center; }
-.qrow { display: grid; grid-template-columns: 1fr 110px 90px; gap: 8px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--bg2); }
-.qrow:hover { background: var(--bg); }
 .qname { font-size: 14px; font-weight: 700; color: var(--dark); }
 .qbadge { display: inline-block; font-size: 11px; background: var(--hero2); color: var(--dark); padding: 2px 8px; border-radius: 999px; margin-left: 6px; font-weight: 500; }
 .qdesc { font-size: 12px; color: var(--sub); margin-top: 3px; }
@@ -167,7 +164,6 @@ body.ready { opacity: 1; }
 .qtotal { display: flex; justify-content: space-between; align-items: center; background: var(--main); color: #fff; padding: 18px 22px; }
 .qtotal-label { font-size: 14px; font-weight: 700; }
 .qtotal-amount { font-size: 22px; font-weight: 800; }
-.qnote { font-size: 12px; color: var(--sub); margin: -18px 0 26px; text-align: right; }
 @media (max-width: 768px) {
   .qhead, .qrow { grid-template-columns: 1fr 84px 62px; gap: 6px; padding: 11px 12px; }
   .qname { font-size: 13px; word-break: keep-all; }
@@ -177,23 +173,6 @@ body.ready { opacity: 1; }
   .qtotal-amount { font-size: 18px; }
 }
 
-/* 신청 양식 — 견적 계산기 */
-.quote-cat { margin-bottom: 22px; }
-.quote-cat-name { font-size: 13px; font-weight: 700; color: var(--sub); letter-spacing: 1px; padding: 9px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 4px; }
-.quote-head { display: grid; grid-template-columns: 1fr 110px 88px; gap: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--sub); border-bottom: 1px solid var(--bg2); }
-.quote-head div:nth-child(2) { text-align: right; }
-.quote-head div:nth-child(3) { text-align: center; }
-.quote-row { display: grid; grid-template-columns: 1fr 110px 88px; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--bg2); }
-.quote-row:hover { background: var(--bg); }
-.quote-item { font-size: 14px; font-weight: 700; color: var(--dark); }
-.quote-desc { font-size: 12px; color: var(--sub); margin-top: 2px; line-height: 1.5; }
-.quote-price { font-size: 13px; font-weight: 700; color: var(--main); text-align: right; white-space: nowrap; }
-.quote-qty { width: 100%; max-width: 70px; margin: 0 auto; display: block; padding: 7px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 14px; font-family: inherit; color: #0a1e0e; background: #fff; }
-.quote-qty:disabled { opacity: 0.3; cursor: not-allowed; }
-.quote-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--main); color: #fff; border-radius: 14px; padding: 20px 24px; margin-top: 22px; }
-.quote-total-label { font-size: 15px; font-weight: 700; }
-.quote-total-amount { font-size: 22px; font-weight: 800; }
-.quote-note { font-size: 12px; color: var(--sub); margin-top: 10px; }
 .label-multi { font-size: 12px; font-weight: 500; color: var(--sub); margin-left: 6px; }
 
 /* 신청 양식 */
@@ -240,7 +219,7 @@ body.ready { opacity: 1; }
 .quote-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-top: 20px; }
 .quote-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 13px; color: var(--text); }
 .quote-line b { flex-shrink: 0; color: var(--dark); font-weight: 700; white-space: nowrap; }
-.quote-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; }
+.quote-total { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding-top: 16px; margin-top: 6px; border-top: 2px solid var(--border); }
 .quote-total span { font-size: 14px; font-weight: 700; color: var(--dark); }
 .quote-total strong { font-size: 24px; font-weight: 800; color: var(--main); letter-spacing: -0.5px; }
 .quote-note { font-size: 12px; color: var(--sub); margin-top: 10px; line-height: 1.7; }
@@ -291,12 +270,10 @@ body.ready { opacity: 1; }
   .faq-a { font-size: 12px; padding: 12px 14px; }
   .refund-table th, .refund-table td { padding: 10px 12px; font-size: 13px; }
   .footer-sec { padding: 32px 20px; }
-  .quote-head, .quote-row { grid-template-columns: 1fr 84px 62px; gap: 6px; padding: 10px 8px; }
-  .quote-item { font-size: 13px; word-break: keep-all; }
-  .quote-price { font-size: 12px; }
-  .quote-qty { max-width: 50px; padding: 5px; font-size: 13px; }
-  .quote-total { padding: 16px 18px; }
-  .quote-total-amount { font-size: 18px; }
+  .qrow { flex-wrap: wrap; }
+  .qrow-label { font-size: 13px; }
+  .quote-box { padding: 16px 14px; }
+  .quote-total strong { font-size: 20px; }
   .footer-name { font-size: 18px; }
 }
 </style>
