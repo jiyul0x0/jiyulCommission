@@ -718,9 +718,11 @@ function parsePrice(str) {
 }
 const won = n => n.toLocaleString('ko-KR') + '원';
 
-function renderQuote(priceList, opts) {
+function renderQuote(priceList, opts, enabled) {
   opts = opts || {};
   QUOTE = [];
+  const wrapEl = document.getElementById('quote-wrap');
+  if (enabled === false) { wrapEl.style.display = 'none'; return; }
   (priceList || []).forEach(function(p) {
     const key = (p.category || '') + '§' + (p.item || '');
     const mode = opts[key] || 'hidden';
@@ -803,14 +805,17 @@ function calcQuote() {
     ? r.lines.map(function(l) { return '<div class="quote-line">' + l.n + '<b>' + l.a + '</b></div>'; }).join('')
     : '<div class="quote-line" style="border:none;">선택된 항목이 없어요.<b>-</b></div>';
   document.getElementById('quote-total').textContent = won(r.total);
-  document.getElementById('quote-note').textContent = r.ask
-    ? '※ 「문의 필요」 항목은 상담 후 견적에 반영됩니다.'
-    : '※ 예상 금액이며 최종 견적은 문의 후 확정됩니다.';
+  const notes = [];
+  if (r.ask) notes.push('※ 「문의 필요」 항목은 상담 후 견적에 반영됩니다.');
+  notes.push(window.__quoteNote || '※ 예상 금액이며 최종 견적은 문의 후 확정됩니다.');
+  document.getElementById('quote-note').innerHTML =
+    notes.map(function(t) { return '<div>' + nl(t) + '</div>'; }).join('');
 }
 
 function renderApply(ap, secApply, priceList) {
   APPLY_FIELDS = ap.fields || [];
-  renderQuote(priceList, ap.priceOpts);
+  window.__quoteNote = ap.quote_note || '';
+  renderQuote(priceList, ap.priceOpts, ap.quote !== false);
   const intro = document.getElementById('apply-intro');
   intro.innerHTML = nl(ap.intro);
   intro.style.display = ap.intro ? '' : 'none';
