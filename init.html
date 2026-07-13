@@ -74,15 +74,16 @@ const auth = getAuth(app);
 const SECTIONS = {
   notice:  { visible: true,  title: '공지사항', order: 0,          subtitle: '' },
   status:  { visible: true,  title: '예약 현황', order: 1,          subtitle: '' },
-  process: { visible: true,  title: '진행 방식', order: 2,          subtitle: '' },
-  collab:  { visible: false, title: '협업 작가', order: 3,          subtitle: '' },
-  price:   { visible: true,  title: '가격표', order: 4,             subtitle: '',
+  process: { visible: true,  title: '진행 방식', order: 2,          subtitle: '', style: 'list' },
+  flow:    { visible: false, title: '작업 과정', order: 3,          subtitle: '' },
+  collab:  { visible: false, title: '협업 작가', order: 4,          subtitle: '' },
+  price:   { visible: true,  title: '가격표', order: 5,             subtitle: '',
              head1: '작업 항목', head2: '포함 내용', head3: '가격', note: '' },
-  sample:  { visible: true,  title: '포트폴리오 · 샘플', order: 5,  subtitle: '' },
-  faq:     { visible: true,  title: '자주 묻는 질문', order: 6,     subtitle: '' },
-  refund:  { visible: true,  title: '환불 정책', order: 7,          subtitle: '',
+  sample:  { visible: true,  title: '포트폴리오 · 샘플', order: 6,  subtitle: '' },
+  faq:     { visible: true,  title: '자주 묻는 질문', order: 7,     subtitle: '' },
+  refund:  { visible: true,  title: '환불 정책', order: 8,          subtitle: '',
              head1: '작업 단계', head2: '환불 비율' },
-  apply:   { visible: true,  title: '신청 양식', order: 8,          subtitle: '' }
+  apply:   { visible: true,  title: '신청 양식', order: 9,          subtitle: '' }
 };
 
 const EMPTY = {
@@ -93,6 +94,7 @@ const EMPTY = {
   notice: { answer_time: '', items: [] },
   status: [],
   process: [],
+  flow: [],
   price: [],
   samples: [],
   faq: [],
@@ -114,6 +116,7 @@ window.run = function() {
     notice: e.notice,
     status: e.status,
     process: e.process,
+    flow: e.flow,
     price: e.price,
     samples: e.samples,
     faq: e.faq,
