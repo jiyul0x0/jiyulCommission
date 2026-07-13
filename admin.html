@@ -64,7 +64,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 .tp-card { background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 14px; }
 .tp-card b { color: var(--dark); font-size: 13px; }
 .tp-card p { color: var(--text); font-size: 12px; margin-top: 4px; }
-.sec-row { display: grid; grid-template-columns: auto 150px 1fr; gap: 12px; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
+.sec-row { display: grid; grid-template-columns: auto auto 150px 1fr; gap: 12px; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
 .sec-row input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; }
 /* 로그인 */
 #login-overlay { position: fixed; inset: 0; background: var(--bg2); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
@@ -79,7 +79,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 .logout-btn:hover { background: rgba(255,255,255,0.4); }
 @media (max-width: 700px) {
   .field-grid2, .field-grid3 { grid-template-columns: 1fr; }
-  .sec-row { grid-template-columns: auto 1fr; }
+  .sec-row { grid-template-columns: auto auto 1fr; }
   .status-row { grid-template-columns: auto 1fr; }
 }
 </style>
@@ -156,7 +156,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 
   <div class="admin-section">
     <div class="admin-section-title">🧩 0-1. 섹션 제목 &amp; 표시 여부</div>
-    <div class="hint" style="margin-bottom:14px;">체크를 끄면 해당 섹션이 페이지에서 사라지고, <b>상단 네비게이션에서도 자동으로 빠집니다.</b> 섹션 제목이 곧 메뉴 이름이에요.</div>
+    <div class="hint" style="margin-bottom:14px;">☰ 를 잡고 <b>드래그하면 페이지 순서가 바뀝니다.</b> 체크를 끄면 페이지와 네비게이션에서 함께 사라지고, 섹션 제목이 곧 메뉴 이름이에요.</div>
     <div id="section-items"></div>
 
     <div class="field-grid3" style="margin-top:20px;">
@@ -600,6 +600,7 @@ window.seedDefaults = function() {
     if (sec.visible === undefined) sec.visible = (k === 'collab') ? !!(D.collab && D.collab.visible) : true;
     if (sec.title === undefined) sec.title = pair[1];
     if (sec.subtitle === undefined) sec.subtitle = '';
+    if (sec.order === undefined) sec.order = SECTION_LIST.findIndex(function(p) { return p[0] === k; });
   });
   var p = D.sections.price;
   if (p.head1 === undefined) p.head1 = '작업 항목';
@@ -833,16 +834,38 @@ function initSortable(elId, dataKey, subKey, renderFn) {
 }
 
 /* ---------- 섹션 설정 ---------- */
+var _secSortable = null;
+function sortedSectionKeys() {
+  return SECTION_LIST.map(function(p) { return p[0]; })
+    .sort(function(a, b) {
+      var oa = window.D.sections[a].order, ob = window.D.sections[b].order;
+      return (oa == null ? 99 : oa) - (ob == null ? 99 : ob);
+    });
+}
 function renderSections() {
   var el = document.getElementById('section-items'); el.innerHTML = '';
-  SECTION_LIST.forEach(function(pair) {
-    var k = pair[0], sec = window.D.sections[k];
+  sortedSectionKeys().forEach(function(k) {
+    var sec = window.D.sections[k];
     el.innerHTML +=
-      '<div class="sec-row">' +
+      '<div class="sec-row" data-key="'+k+'">' +
+        '<span class="drag-handle">'+H+'</span>' +
         '<input type="checkbox"'+(sec.visible?' checked':'')+' onchange="window.D.sections.'+k+'.visible=this.checked">' +
         '<input type="text" value="'+(sec.title||'')+'" placeholder="섹션 제목" oninput="window.D.sections.'+k+'.title=this.value">' +
         '<input type="text" value="'+(sec.subtitle||'')+'" placeholder="제목 아래 작게 표시될 부제 (비워도 됨)" oninput="window.D.sections.'+k+'.subtitle=this.value">' +
       '</div>';
+  });
+
+  if (_secSortable) { try { _secSortable.destroy(); } catch (e) {} }
+  _secSortable = Sortable.create(el, {
+    handle: '.drag-handle', animation: 150,
+    ghostClass: 'sortable-ghost', chosenClass: 'sortable-chosen',
+    onEnd: function() {
+      // 화면에 보이는 순서대로 order 재부여
+      Array.prototype.forEach.call(el.querySelectorAll('.sec-row'), function(row, i) {
+        var k = row.getAttribute('data-key');
+        if (window.D.sections[k]) window.D.sections[k].order = i;
+      });
+    }
   });
 }
 
