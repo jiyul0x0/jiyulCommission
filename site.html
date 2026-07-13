@@ -100,6 +100,15 @@ body.ready { opacity: 1; }
 .step-content h4 { font-size: 16px; font-weight: 700; color: var(--dark); margin-bottom: 6px; }
 .step-content p { font-size: 13px; color: var(--text); line-height: 1.9; }
 
+/* 진행 방식 — 가로 카드 */
+.flow-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 14px; }
+.flow-card { background: var(--bg); border: 1px solid var(--bg2); border-radius: 16px; padding: 24px 14px 20px; text-align: center; transition: 0.18s; }
+.flow-card:hover { transform: translateY(-3px); border-color: var(--border); box-shadow: 0 10px 24px -14px rgba(0,0,0,0.18); }
+.flow-num { width: 30px; height: 30px; border-radius: 50%; background: #2b2b2f; color: #fff; font-size: 14px; font-weight: 700; display: flex; align-items: center; justify-content: center; margin: 0 auto 14px; }
+.flow-card:last-child .flow-num { background: var(--main); }
+.flow-title { font-size: 14px; font-weight: 700; color: var(--dark); margin-bottom: 7px; }
+.flow-desc { font-size: 12px; color: var(--sub); line-height: 1.7; word-break: keep-all; }
+
 /* 협업작가 */
 .collab-grid { display: flex; flex-direction: column; gap: 20px; }
 .collab-card { display: flex; gap: 24px; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 24px; }
@@ -257,6 +266,10 @@ body.ready { opacity: 1; }
   .section-title { font-size: 17px; }
   .notice-grid { grid-template-columns: 1fr; }
   .status-wrap { grid-template-columns: 1fr; gap: 10px; }
+  .flow-grid { grid-template-columns: repeat(auto-fit, minmax(120px, 1fr)); gap: 10px; }
+  .flow-card { padding: 18px 10px 16px; }
+  .flow-title { font-size: 13px; }
+  .flow-desc { font-size: 11px; }
   .step { gap: 14px; padding: 18px 0; }
   .step-num { width: 34px; height: 34px; font-size: 15px; }
   .step-content h4 { font-size: 14px; }
@@ -317,6 +330,12 @@ body.ready { opacity: 1; }
     <div class="section-title" id="t-process">진행 방식</div>
     <div class="section-subtitle" id="s-process"></div>
     <div class="steps" id="steps"></div>
+  </div>
+
+  <div class="section" id="sec-flow">
+    <div class="section-title" id="t-flow">작업 과정</div>
+    <div class="section-subtitle" id="s-flow"></div>
+    <div class="flow-grid" id="flow-grid"></div>
   </div>
 
   <div class="section" id="sec-collab" style="display:none;">
@@ -490,13 +509,14 @@ const DEF_SITE = {
 const DEF_SECTIONS = {
   notice:  { visible: true, title: '공지사항',        subtitle: '', order: 0 },
   status:  { visible: true, title: '예약 현황',        subtitle: '', order: 1 },
-  process: { visible: true, title: '진행 방식',        subtitle: '', order: 2 },
-  collab:  { visible: false, title: '협업 작가',       subtitle: '', order: 3 },
-  price:   { visible: true, title: '가격표',          subtitle: '', note: '', head1: '작업 항목', head2: '포함 내용', head3: '가격', order: 4 },
-  sample:  { visible: true, title: '포트폴리오 · 샘플', subtitle: '', order: 5 },
-  faq:     { visible: true, title: '자주 묻는 질문',   subtitle: '', order: 6 },
-  refund:  { visible: true, title: '환불 정책',        subtitle: '', head1: '작업 단계', head2: '환불 비율', order: 7 },
-  apply:   { visible: true, title: '신청 양식',        subtitle: '', order: 8 }
+  process: { visible: true, title: '진행 방식',        subtitle: '', order: 2, style: 'list' },
+  flow:    { visible: false, title: '작업 과정',       subtitle: '', order: 3 },
+  collab:  { visible: false, title: '협업 작가',       subtitle: '', order: 4 },
+  price:   { visible: true, title: '가격표',          subtitle: '', note: '', head1: '작업 항목', head2: '포함 내용', head3: '가격', order: 5 },
+  sample:  { visible: true, title: '포트폴리오 · 샘플', subtitle: '', order: 6 },
+  faq:     { visible: true, title: '자주 묻는 질문',   subtitle: '', order: 7 },
+  refund:  { visible: true, title: '환불 정책',        subtitle: '', head1: '작업 단계', head2: '환불 비율', order: 8 },
+  apply:   { visible: true, title: '신청 양식',        subtitle: '', order: 9 }
 };
 
 /* 관리자에서 드래그한 순서대로 섹션 DOM 재배치 */
@@ -632,10 +652,21 @@ onValue(ref(db, SITE_KEY), function(snapshot) {
     sw.innerHTML += `<div class="status-item status-${s.type}"><div class="status-dot">${STATUS_ICONS[s.type] || '✅'}</div><div class="status-label">${s.label || ''}</div><div class="status-desc">${s.desc || ''}</div></div>`;
   });
 
-  // 3. 진행방식
-  const steps = document.getElementById('steps'); steps.innerHTML = '';
+  // 3. 진행방식 (세로 목록 / 가로 카드)
+  const steps = document.getElementById('steps');
+  const asCards = sec.process.style === 'cards';
+  steps.className = asCards ? 'flow-grid' : 'steps';
+  steps.innerHTML = '';
   (d.process || []).forEach((p, i) => {
-    steps.innerHTML += `<div class="step"><div class="step-num">${i+1}</div><div class="step-content"><h4>${p.title || ''}</h4><p>${nl(p.body)}</p></div></div>`;
+    steps.innerHTML += asCards
+      ? `<div class="flow-card"><div class="flow-num">${i+1}</div><div class="flow-title">${p.title || ''}</div><div class="flow-desc">${nl(p.body)}</div></div>`
+      : `<div class="step"><div class="step-num">${i+1}</div><div class="step-content"><h4>${p.title || ''}</h4><p>${nl(p.body)}</p></div></div>`;
+  });
+
+  // 3-1. 작업 과정 (가로 카드)
+  const fg = document.getElementById('flow-grid'); fg.innerHTML = '';
+  (d.flow || []).forEach((p, i) => {
+    fg.innerHTML += `<div class="flow-card"><div class="flow-num">${i+1}</div><div class="flow-title">${p.title || ''}</div><div class="flow-desc">${nl(p.body)}</div></div>`;
   });
 
   // 4. 협업작가
