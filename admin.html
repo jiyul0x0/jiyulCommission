@@ -285,6 +285,7 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
         가격에 숫자가 없으면(예: <b>협의</b>) 합계에 더하지 않고 <b>문의 필요</b>로 표시됩니다.
       </div>
       <div id="apply-price-opts"></div>
+      <div class="field-row" style="margin-top:16px;"><label>견적 안내문</label><input type="text" id="apply-quote_note" placeholder="견적표 아래 표시될 문구 (선택)"></div>
     </div>
   </div>
 
@@ -637,7 +638,6 @@ window.collectInputs = function() {
   D.apply.agree = document.getElementById('apply-agree').value;
   D.apply.quote = document.getElementById('apply-quote').checked;
   D.apply.quote_note = document.getElementById('apply-quote_note').value;
-  D.apply.quote = document.getElementById('apply-quote').checked;
   D.sections.price.head1 = document.getElementById('price-head1').value;
   D.sections.price.head2 = document.getElementById('price-head2').value;
   D.sections.price.head3 = document.getElementById('price-head3').value;
@@ -657,7 +657,6 @@ window.renderAll = function() {
   document.getElementById('apply-agree').value = D.apply.agree || '';
   document.getElementById('apply-quote').checked = D.apply.quote !== false;
   document.getElementById('apply-quote_note').value = D.apply.quote_note || '';
-  document.getElementById('apply-quote').checked = D.apply.quote !== false;
   document.getElementById('price-head1').value = D.sections.price.head1;
   document.getElementById('price-head2').value = D.sections.price.head2;
   document.getElementById('price-head3').value = D.sections.price.head3;
