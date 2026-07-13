@@ -288,6 +288,19 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
     </div>
   </div>
 
+  <div class="admin-section">
+    <div class="admin-section-title">💾 10. 백업 &amp; 복원</div>
+    <div class="hint" style="margin-bottom:14px;">이 커미션(<b id="backup-key"></b>)의 모든 내용을 JSON 파일로 저장하고, 나중에 되돌릴 수 있어요. <b>중요한 수정 전에 한 번씩 받아두세요.</b></div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;">
+      <button class="btn btn-green" onclick="downloadBackup()">⬇️ 백업 파일 받기</button>
+      <label class="btn" style="background:#eee;color:#555;">
+        ⬆️ 백업 파일 불러오기
+        <input type="file" accept="application/json,.json" style="display:none;" onchange="loadBackup(this)">
+      </label>
+    </div>
+    <div class="hint" style="margin-top:10px;">불러오기를 하면 화면에만 반영돼요. 확인 후 <b>저장</b>을 눌러야 DB에 적용됩니다.</div>
+  </div>
+
   <div class="admin-section" style="border-color:#e8a0a0;">
     <div class="admin-section-title" style="color:#c03030;border-bottom-color:#e8a0a0;">⚠️ 위험 구역</div>
     <div class="hint" style="margin-bottom:14px;">이 커미션(<b id="danger-key"></b>)의 <b>모든 데이터가 영구히 삭제</b>됩니다. 되돌릴 수 없어요.</div>
@@ -407,15 +420,20 @@ function startAdmin() {
     // 2) 해당 커미션 데이터
     onValue(ref(db, SITE_KEY), function(snapshot) {
       const d = snapshot.val();
+      const status = document.getElementById('load-status');
+
       if (!d) {
-        document.getElementById('load-status').textContent =
-          '"' + SITE_KEY + '" 데이터 없음 — init.html에서 먼저 생성하세요';
-        return;
+        // 데이터가 없어도 편집·복원은 가능하도록 빈 구조로 시작
+        window.D = {};
+        window.seedDefaults();
+        window.renderAll();
+        status.innerHTML = '⚠️ "' + SITE_KEY + '" 에 데이터가 없어요. 새로 채우거나, 아래 <b>백업 &amp; 복원</b>에서 백업 파일을 불러온 뒤 저장하세요.';
+      } else {
+        window.D = JSON.parse(JSON.stringify(d));
+        window.seedDefaults();
+        window.renderAll();
+        status.textContent = '데이터 로드 완료 ✅  ·  사이트 키 : ' + SITE_KEY;
       }
-      window.D = JSON.parse(JSON.stringify(d));
-      window.seedDefaults();
-      window.renderAll();
-      document.getElementById('load-status').textContent = '데이터 로드 완료 ✅  ·  사이트 키 : ' + SITE_KEY;
       document.getElementById('save-btn').disabled = false;
     }, { onlyOnce: true });
   }, { onlyOnce: true });
@@ -721,12 +739,64 @@ function drawPreview() {
   else box.innerHTML = '<img src="' + u + '" style="' + style + '">';
 }
 
+/* ---------- 백업 / 복원 ---------- */
+window.downloadBackup = function() {
+  if (!window.D) { alert('데이터가 아직 로드되지 않았어요.'); return; }
+  window.collectInputs();
+  var payload = {
+    _type: 'commission-backup',
+    _version: 1,
+    siteKey: window.SITE_KEY,
+    exportedAt: new Date().toISOString(),
+    meta: window.META || {},
+    data: window.D
+  };
+  var blob = new Blob([JSON.stringify(payload, null, 2)], { type: 'application/json' });
+  var url = URL.createObjectURL(blob);
+  var stamp = new Date().toISOString().slice(0, 16).replace(/[-:T]/g, '');
+  var a = document.createElement('a');
+  a.href = url;
+  a.download = window.SITE_KEY + '_' + stamp + '.json';
+  document.body.appendChild(a); a.click(); document.body.removeChild(a);
+  URL.revokeObjectURL(url);
+};
+
+window.loadBackup = function(input) {
+  var file = input.files[0];
+  if (!file) return;
+  var r = new FileReader();
+  r.onload = function(e) {
+    var p;
+    try { p = JSON.parse(e.target.result); }
+    catch (err) { alert('JSON 파일을 읽지 못했어요.'); input.value = ''; return; }
+    if (!p || p._type !== 'commission-backup' || !p.data) {
+      alert('이 커미션 백업 파일이 아니에요.'); input.value = ''; return;
+    }
+    var when = p.exportedAt ? new Date(p.exportedAt).toLocaleString('ko-KR') : '알 수 없음';
+    var msg = '백업을 불러올까요?\n\n· 원본 사이트 키 : ' + (p.siteKey || '?') +
+              '\n· 백업 시각 : ' + when +
+              '\n\n지금 편집 중인 내용은 화면에서 사라집니다.\n(저장을 누르기 전까지 DB는 바뀌지 않아요)';
+    if (!confirm(msg)) { input.value = ''; return; }
+    window.D = p.data;
+    if (p.meta) {
+      window.META = p.meta;
+      window.META.preview = p.meta.preview || '';
+    }
+    window.seedDefaults();
+    window.renderAll();
+    input.value = '';
+    alert('불러왔어요.\n내용을 확인한 뒤 저장을 눌러주세요.');
+  };
+  r.readAsText(file);
+};
+
 window.renderHubSection = function() {
   var m = window.META;
   if (!m) return;
   document.getElementById('meta-published').checked = m.published !== false;
   document.getElementById('meta-visible').checked = m.visible !== false;
   document.getElementById('danger-key').textContent = window.SITE_KEY || '';
+  document.getElementById('backup-key').textContent = window.SITE_KEY || '';
   document.getElementById('danger-confirm').placeholder = '삭제하려면 "' + (window.SITE_KEY || '') + '" 입력';
   document.getElementById('meta-order').value = m.order != null ? m.order : 1;
   document.getElementById('meta-desc').value = m.desc || '';
