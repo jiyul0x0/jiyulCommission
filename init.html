@@ -57,7 +57,7 @@ import { getAuth, signInWithEmailAndPassword } from 'https://www.gstatic.com/fir
 const firebaseConfig = {
   apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
   authDomain: "jiyul-commission-2e306.firebaseapp.com",
-  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com",
+  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
   projectId: "jiyul-commission-2e306",
   storageBucket: "jiyul-commission-2e306.firebasestorage.app",
   messagingSenderId: "348428402333",
@@ -72,17 +72,17 @@ const auth = getAuth(app);
 /* 섹션 제목은 기본값을 넣고, 나머지 내용은 전부 비워둡니다.
    각 입력칸의 힌트 문구는 admin.html 에서 안내됩니다. */
 const SECTIONS = {
-  notice:  { visible: true,  title: '공지사항',          subtitle: '' },
-  status:  { visible: true,  title: '예약 현황',          subtitle: '' },
-  process: { visible: true,  title: '진행 방식',          subtitle: '' },
-  collab:  { visible: false, title: '협업 작가',          subtitle: '' },
-  price:   { visible: true,  title: '가격표',             subtitle: '',
+  notice:  { visible: true,  title: '공지사항', order: 0,          subtitle: '' },
+  status:  { visible: true,  title: '예약 현황', order: 1,          subtitle: '' },
+  process: { visible: true,  title: '진행 방식', order: 2,          subtitle: '' },
+  collab:  { visible: false, title: '협업 작가', order: 3,          subtitle: '' },
+  price:   { visible: true,  title: '가격표', order: 4,             subtitle: '',
              head1: '작업 항목', head2: '포함 내용', head3: '가격', note: '' },
-  sample:  { visible: true,  title: '포트폴리오 · 샘플',  subtitle: '' },
-  faq:     { visible: true,  title: '자주 묻는 질문',     subtitle: '' },
-  refund:  { visible: true,  title: '환불 정책',          subtitle: '',
+  sample:  { visible: true,  title: '포트폴리오 · 샘플', order: 5,  subtitle: '' },
+  faq:     { visible: true,  title: '자주 묻는 질문', order: 6,     subtitle: '' },
+  refund:  { visible: true,  title: '환불 정책', order: 7,          subtitle: '',
              head1: '작업 단계', head2: '환불 비율' },
-  apply:   { visible: true,  title: '신청 양식',          subtitle: '' }
+  apply:   { visible: true,  title: '신청 양식', order: 8,          subtitle: '' }
 };
 
 const EMPTY = {
