@@ -151,6 +151,54 @@ body.ready { opacity: 1; }
 .refund-partial { color: #806000; font-weight: 700; }
 .refund-none    { color: #c03030; font-weight: 700; }
 
+/* 견적 계산기 */
+.quote-block { border: 1px solid var(--border); border-radius: 14px; overflow: hidden; margin-bottom: 28px; }
+.quote-cat { font-size: 12px; font-weight: 700; color: var(--sub); background: var(--bg); padding: 10px 18px; letter-spacing: 1px; border-bottom: 1px solid var(--bg2); }
+.qhead { display: grid; grid-template-columns: 1fr 110px 90px; gap: 8px; background: var(--bg2); padding: 11px 18px; font-size: 12px; font-weight: 700; color: var(--dark); }
+.qhead div:nth-child(2) { text-align: right; }
+.qhead div:nth-child(3) { text-align: center; }
+.qrow { display: grid; grid-template-columns: 1fr 110px 90px; gap: 8px; align-items: center; padding: 13px 18px; border-bottom: 1px solid var(--bg2); }
+.qrow:hover { background: var(--bg); }
+.qname { font-size: 14px; font-weight: 700; color: var(--dark); }
+.qbadge { display: inline-block; font-size: 11px; background: var(--hero2); color: var(--dark); padding: 2px 8px; border-radius: 999px; margin-left: 6px; font-weight: 500; }
+.qdesc { font-size: 12px; color: var(--sub); margin-top: 3px; }
+.qprice { font-size: 13px; font-weight: 700; color: var(--main); text-align: right; white-space: nowrap; }
+.qty { width: 100%; max-width: 70px; margin: 0 auto; display: block; padding: 7px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 14px; font-family: inherit; color: #0a1e0e; outline: none; }
+.qty:focus { border-color: var(--main); }
+.qty:disabled { opacity: 0.3; cursor: not-allowed; }
+.qtotal { display: flex; justify-content: space-between; align-items: center; background: var(--main); color: #fff; padding: 18px 22px; }
+.qtotal-label { font-size: 14px; font-weight: 700; }
+.qtotal-amount { font-size: 22px; font-weight: 800; }
+.qnote { font-size: 12px; color: var(--sub); margin: -18px 0 26px; text-align: right; }
+@media (max-width: 768px) {
+  .qhead, .qrow { grid-template-columns: 1fr 84px 62px; gap: 6px; padding: 11px 12px; }
+  .qname { font-size: 13px; word-break: keep-all; }
+  .qprice { font-size: 12px; }
+  .qty { max-width: 52px; padding: 5px; font-size: 13px; }
+  .qtotal { padding: 15px 16px; }
+  .qtotal-amount { font-size: 18px; }
+}
+
+/* 신청 양식 — 견적 계산기 */
+.quote-wrap { margin-bottom: 30px; }
+.quote-cat { margin-bottom: 22px; }
+.quote-cat-name { font-size: 13px; font-weight: 700; color: var(--sub); letter-spacing: 1px; padding: 9px 14px; background: var(--bg); border-radius: 8px; margin-bottom: 4px; }
+.quote-head { display: grid; grid-template-columns: 1fr 110px 88px; gap: 8px; padding: 8px 14px; font-size: 12px; font-weight: 700; color: var(--sub); border-bottom: 1px solid var(--bg2); }
+.quote-head div:nth-child(2) { text-align: right; }
+.quote-head div:nth-child(3) { text-align: center; }
+.quote-row { display: grid; grid-template-columns: 1fr 110px 88px; gap: 8px; align-items: center; padding: 12px 14px; border-bottom: 1px solid var(--bg2); }
+.quote-row:hover { background: var(--bg); }
+.quote-item { font-size: 14px; font-weight: 700; color: var(--dark); }
+.quote-desc { font-size: 12px; color: var(--sub); margin-top: 2px; line-height: 1.5; }
+.quote-price { font-size: 13px; font-weight: 700; color: var(--main); text-align: right; white-space: nowrap; }
+.quote-qty { width: 100%; max-width: 70px; margin: 0 auto; display: block; padding: 7px; border: 1px solid var(--border); border-radius: 8px; text-align: center; font-size: 14px; font-family: inherit; color: #0a1e0e; background: #fff; }
+.quote-qty:disabled { opacity: 0.3; cursor: not-allowed; }
+.quote-total { display: flex; align-items: center; justify-content: space-between; gap: 12px; background: var(--main); color: #fff; border-radius: 14px; padding: 20px 24px; margin-top: 22px; }
+.quote-total-label { font-size: 15px; font-weight: 700; }
+.quote-total-amount { font-size: 22px; font-weight: 800; }
+.quote-note { font-size: 12px; color: var(--sub); margin-top: 10px; }
+.label-multi { font-size: 12px; font-weight: 500; color: var(--sub); margin-left: 6px; }
+
 /* 신청 양식 */
 .apply-intro { font-size: 13px; color: var(--text); line-height: 1.9; margin-bottom: 24px; padding: 16px 20px; background: var(--bg); border-radius: 12px; border-left: 4px solid var(--light); word-break: keep-all; }
 .apply-fields { display: flex; flex-direction: column; gap: 22px; }
@@ -175,6 +223,31 @@ body.ready { opacity: 1; }
 .apply-toast { text-align: center; font-size: 13px; font-weight: 700; color: var(--main); min-height: 20px; margin-top: 14px; opacity: 0; transition: opacity 0.2s; }
 .apply-toast.show { opacity: 1; }
 .apply-toast.err { color: #c03030; }
+
+/* 견적 계산 */
+.quote-wrap { margin-top: 30px; padding-top: 26px; border-top: 1px solid var(--bg2); }
+.quote-head { font-size: 13px; font-weight: 700; color: var(--dark); margin-bottom: 16px; }
+.qgroup { margin-bottom: 20px; }
+.qgroup-name { font-size: 12px; font-weight: 700; color: var(--sub); letter-spacing: 0.5px; margin-bottom: 9px; }
+.qrow { display: flex; align-items: center; gap: 10px; padding: 11px 14px; border: 1px solid var(--bg2); border-radius: 12px; background: #fff; margin-bottom: 8px; transition: 0.15s; }
+.qrow.on { border-color: var(--main); background: var(--bg); }
+.qrow input[type=checkbox] { width: 16px; height: 16px; accent-color: var(--main); cursor: pointer; flex-shrink: 0; }
+.qrow-label { flex: 1; font-size: 13.5px; color: #0a1e0e; word-break: keep-all; cursor: pointer; }
+.qrow-label small { display: block; font-size: 12px; color: var(--sub); margin-top: 2px; }
+.qrow-price { flex-shrink: 0; font-size: 12.5px; font-weight: 700; color: var(--main); white-space: nowrap; }
+.qrow-base { flex-shrink: 0; font-size: 11px; font-weight: 700; color: var(--sub); background: var(--bg2); padding: 3px 9px; border-radius: 999px; }
+.qty-box { flex-shrink: 0; display: flex; align-items: center; border: 1px solid var(--border); border-radius: 9px; overflow: hidden; background: #fff; }
+.qty-box button { width: 30px; height: 30px; border: 0; background: none; color: var(--text); font-size: 16px; cursor: pointer; font-family: inherit; }
+.qty-box button:hover { background: var(--bg); }
+.qty-box span { min-width: 26px; text-align: center; font-size: 13px; font-weight: 700; color: var(--dark); }
+.quote-box { background: var(--bg); border: 1px solid var(--border); border-radius: 14px; padding: 20px 22px; margin-top: 20px; }
+.quote-line { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; padding: 9px 0; border-bottom: 1px dashed var(--border); font-size: 13px; color: var(--text); }
+.quote-line b { flex-shrink: 0; color: var(--dark); font-weight: 700; white-space: nowrap; }
+.quote-total { display: flex; justify-content: space-between; align-items: baseline; padding-top: 16px; }
+.quote-total span { font-size: 14px; font-weight: 700; color: var(--dark); }
+.quote-total strong { font-size: 24px; font-weight: 800; color: var(--main); letter-spacing: -0.5px; }
+.quote-note { font-size: 12px; color: var(--sub); margin-top: 10px; line-height: 1.7; }
+.label-multi { font-size: 12px; font-weight: 500; color: var(--sub); margin-left: 6px; }
 
 /* 푸터 */
 .footer-sec { background: linear-gradient(160deg, var(--hero1) 0%, var(--hero2) 100%); padding: 48px 80px; text-align: center; border-top: 2px solid var(--border); }
@@ -221,6 +294,12 @@ body.ready { opacity: 1; }
   .faq-a { font-size: 12px; padding: 12px 14px; }
   .refund-table th, .refund-table td { padding: 10px 12px; font-size: 13px; }
   .footer-sec { padding: 32px 20px; }
+  .quote-head, .quote-row { grid-template-columns: 1fr 84px 62px; gap: 6px; padding: 10px 8px; }
+  .quote-item { font-size: 13px; word-break: keep-all; }
+  .quote-price { font-size: 12px; }
+  .quote-qty { max-width: 50px; padding: 5px; font-size: 13px; }
+  .quote-total { padding: 16px 18px; }
+  .quote-total-amount { font-size: 18px; }
   .footer-name { font-size: 18px; }
 }
 </style>
@@ -310,7 +389,18 @@ body.ready { opacity: 1; }
     <div class="section-title" id="t-apply">신청 양식</div>
     <div class="section-subtitle" id="s-apply"></div>
     <div class="apply-intro" id="apply-intro"></div>
+    <div class="quote-block" id="apply-quote" style="display:none;"></div>
+    <div class="qnote" id="apply-qnote" style="display:none;">※ 최종 금액은 문의 후 확정됩니다.</div>
     <div class="apply-fields" id="apply-fields"></div>
+    <div class="quote-wrap" id="quote-wrap" style="display:none;">
+      <div class="quote-head">💰 옵션 선택 &amp; 예상 견적</div>
+      <div id="quote-options"></div>
+      <div class="quote-box">
+        <div id="quote-lines"></div>
+        <div class="quote-total"><span>예상 합계</span><strong id="quote-total">0원</strong></div>
+        <div class="quote-note" id="quote-note"></div>
+      </div>
+    </div>
     <label class="apply-agree" id="apply-agree-wrap">
       <input type="checkbox" id="apply-agree">
       <span id="apply-agree-text"></span>
@@ -619,7 +709,7 @@ onValue(ref(db, SITE_KEY), function(snapshot) {
   document.body.classList.add('ready');
 
   // 9. 신청 양식
-  renderApply(d.apply || {}, sec.apply);
+  renderApply(d.apply || {}, sec.apply, d.price);
 
   // 테마 적용 완료 → 화면 표시
   document.body.classList.add('ready');
@@ -630,15 +720,115 @@ onValue(ref(db, SITE_KEY), function(snapshot) {
 
 /* ---------- 신청 양식 ---------- */
 let APPLY_FIELDS = [];
-function renderApply(ap, secApply) {
+let QUOTE = [];
+
+function parsePrice(str) {
+  const m = String(str || '').replace(/,/g, '').match(/\d+/);
+  return m ? parseInt(m[0], 10) : null;   // 숫자가 없으면 '문의 필요'
+}
+const won = n => n.toLocaleString('ko-KR') + '원';
+
+function renderQuote(priceList, opts) {
+  opts = opts || {};
+  QUOTE = [];
+  (priceList || []).forEach(function(p) {
+    const key = (p.category || '') + '§' + (p.item || '');
+    const mode = opts[key] || 'hidden';
+    if (mode === 'hidden') return;
+    QUOTE.push({
+      key: key, cat: p.category || '기타', name: p.item || '',
+      desc: p.desc || '', raw: p.price || '', amount: parsePrice(p.price),
+      mode: mode, qty: mode === 'base' ? 1 : 0
+    });
+  });
+
+  const wrap = document.getElementById('quote-wrap');
+  if (!QUOTE.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = '';
+
+  const cats = [];
+  QUOTE.forEach(function(q) { if (q.mode !== 'base' && cats.indexOf(q.cat) === -1) cats.push(q.cat); });
+
+  document.getElementById('quote-options').innerHTML = cats.map(function(c) {
+    const rows = QUOTE.map(function(q, i) {
+      if (q.mode === 'base' || q.cat !== c) return '';
+      const price = q.amount === null ? '문의 필요' : '+' + won(q.amount);
+      const label = '<span class="qrow-label">' + q.name +
+        (q.desc ? '<small>' + q.desc + '</small>' : '') + '</span>';
+      if (q.mode === 'qty') {
+        return '<div class="qrow" id="qr-' + i + '">' + label +
+          '<span class="qrow-price">' + price + (q.amount !== null ? ' / 개' : '') + '</span>' +
+          '<div class="qty-box"><button type="button" data-q="' + i + '" data-d="-1">−</button>' +
+          '<span id="qn-' + i + '">0</span>' +
+          '<button type="button" data-q="' + i + '" data-d="1">+</button></div></div>';
+      }
+      return '<label class="qrow" id="qr-' + i + '">' +
+        '<input type="checkbox" data-c="' + i + '">' + label +
+        '<span class="qrow-price">' + price + '</span></label>';
+    }).join('');
+    return '<div class="qgroup"><div class="qgroup-name">' + c + '</div>' + rows + '</div>';
+  }).join('');
+
+  const opt = document.getElementById('quote-options');
+  opt.querySelectorAll('input[type=checkbox]').forEach(function(cb) {
+    cb.onchange = function() {
+      const i = +cb.getAttribute('data-c');
+      QUOTE[i].qty = cb.checked ? 1 : 0;
+      document.getElementById('qr-' + i).classList.toggle('on', cb.checked);
+      calcQuote();
+    };
+  });
+  opt.querySelectorAll('button[data-q]').forEach(function(b) {
+    b.onclick = function() {
+      const i = +b.getAttribute('data-q');
+      QUOTE[i].qty = Math.max(0, QUOTE[i].qty + (+b.getAttribute('data-d')));
+      document.getElementById('qn-' + i).textContent = QUOTE[i].qty;
+      document.getElementById('qr-' + i).classList.toggle('on', QUOTE[i].qty > 0);
+      calcQuote();
+    };
+  });
+  calcQuote();
+}
+
+function quoteLines() {
+  const lines = [];
+  let total = 0, ask = false;
+  QUOTE.forEach(function(q) {
+    if (!q.qty) return;
+    if (q.amount === null) {
+      ask = true;
+      lines.push({ n: q.name + (q.mode === 'qty' && q.qty > 1 ? ' ×' + q.qty : ''), a: q.raw || '문의 필요' });
+      return;
+    }
+    const amt = q.amount * q.qty;
+    total += amt;
+    lines.push({ n: q.name + (q.mode === 'qty' && q.qty > 1 ? ' ×' + q.qty : ''), a: won(amt) });
+  });
+  return { lines: lines, total: total, ask: ask };
+}
+
+function calcQuote() {
+  const r = quoteLines();
+  document.getElementById('quote-lines').innerHTML = r.lines.length
+    ? r.lines.map(function(l) { return '<div class="quote-line">' + l.n + '<b>' + l.a + '</b></div>'; }).join('')
+    : '<div class="quote-line" style="border:none;">선택된 항목이 없어요.<b>-</b></div>';
+  document.getElementById('quote-total').textContent = won(r.total);
+  document.getElementById('quote-note').textContent = r.ask
+    ? '※ 「문의 필요」 항목은 상담 후 견적에 반영됩니다.'
+    : '※ 예상 금액이며 최종 견적은 문의 후 확정됩니다.';
+}
+
+function renderApply(ap, secApply, priceList) {
   APPLY_FIELDS = ap.fields || [];
+  renderQuote(priceList, ap.priceOpts);
   const intro = document.getElementById('apply-intro');
   intro.innerHTML = nl(ap.intro);
   intro.style.display = ap.intro ? '' : 'none';
 
   const wrap = document.getElementById('apply-fields');
   wrap.innerHTML = APPLY_FIELDS.map(function(f, i) {
-    const label = '<label>' + (f.label || '') + '</label>';
+    const multi = f.type === 'multi' ? '<span class="label-multi">(복수 선택 가능)</span>' : '';
+    const label = '<label>' + (f.label || '') + multi + '</label>';
     const hint = f.hint ? '<div class="afield-hint">' + f.hint + '</div>' : '';
     let body = '';
     if (f.type === 'textarea') {
@@ -696,11 +886,20 @@ document.getElementById('apply-copy').addEventListener('click', function() {
     applyToast('동의 항목에 체크해 주세요.', true);
     return;
   }
-  const lines = ['[ ' + (window.__applyTitle || '신청 양식') + ' ]'];
+  const DIV = '─────────────────';
+  const lines = ['[ ' + (window.__applyTitle || '신청 양식') + ' ]', DIV];
   APPLY_FIELDS.forEach(function(f, i) {
     const v = applyValue(f, i);
     lines.push((f.label || '') + ' : ' + (v || '-'));
   });
+  if (QUOTE.length) {
+    const r = quoteLines();
+    lines.push(DIV, '■ 신청 내역');
+    if (r.lines.length) r.lines.forEach(function(l) { lines.push('· ' + l.n + ' : ' + l.a); });
+    else lines.push('· (선택 없음)');
+    lines.push(DIV, '■ 예상 견적 합계 : ' + won(r.total));
+    if (r.ask) lines.push('※ 「문의 필요」 항목은 상담 후 반영됩니다.');
+  }
   const text = lines.join('\n');
   navigator.clipboard.writeText(text)
     .then(function() { applyToast('복사됐어요! 문의처에 붙여넣어 주세요.'); })
@@ -721,6 +920,24 @@ document.getElementById('apply-reset').addEventListener('click', function() {
     if (f.type === 'select' || f.type === 'multi') el.querySelectorAll('.pill').forEach(function(p) { p.classList.remove('on'); });
     else el.value = '';
   });
+  QUOTE.forEach(function(q, i) {
+    if (q.mode === 'base') return;
+    q.qty = 0;
+    const n = document.getElementById('qn-' + i); if (n) n.textContent = '0';
+    const r = document.getElementById('qr-' + i); if (r) r.classList.remove('on');
+  });
+  document.querySelectorAll('#quote-options input[type=checkbox]').forEach(function(c) { c.checked = false; });
+  if (QUOTE.length) calcQuote();
+  QUOTE_ROWS.forEach(function(r) {
+    const el = document.getElementById('qty-' + r.i);
+    if (el) el.value = 0;
+  });
+  calcTotal();
+  QUOTE_ROWS.forEach(function(r, i) {
+    const el = document.getElementById('qq-' + i);
+    if (el) el.value = 0;
+  });
+  if (typeof window.calcQuote === 'function') window.calcQuote();
   const ag = document.getElementById('apply-agree');
   if (ag) ag.checked = false;
   applyToast('초기화됐어요.');
