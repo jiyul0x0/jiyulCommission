@@ -225,8 +225,23 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 
   <div class="admin-section">
     <div class="admin-section-title">⚙️ 3. 진행 방식</div>
+    <div class="field-row">
+      <label>표시 방식</label>
+      <select id="process-style" onchange="window.D.sections.process.style=this.value">
+        <option value="list">세로 목록 — 번호 + 제목 + 설명이 위아래로</option>
+        <option value="cards">가로 카드 — 단계가 나란히 놓인 카드</option>
+      </select>
+      <div class="hint">가로 카드는 단계가 4~7개일 때 보기 좋아요. 설명은 짧게 적어주세요.</div>
+    </div>
     <div id="process-items"></div>
     <button class="btn btn-green" onclick="addProcess()" style="margin-top:8px;">+ 단계 추가</button>
+  </div>
+
+  <div class="admin-section">
+    <div class="admin-section-title">🧭 3-1. 작업 과정 (카드형)</div>
+    <div class="hint" style="margin-bottom:14px;">단계가 <b>가로 카드</b>로 나란히 놓입니다. 마지막 카드의 번호는 메인 컬러로 강조돼요. 설명은 한두 줄로 짧게 적어주세요. <b>진행 방식</b> 섹션과는 별개로 관리됩니다.</div>
+    <div id="flow-items"></div>
+    <button class="btn btn-green" onclick="addFlow()" style="margin-top:8px;">+ 단계 추가</button>
   </div>
 
   <div class="admin-section">
@@ -574,7 +589,7 @@ function renderTheme() {
 
 /* ---------- 기본값 시드 (기존 DB 호환) ---------- */
 var SECTION_LIST = [
-  ['notice','공지사항'], ['status','예약 현황'], ['process','진행 방식'], ['collab','협업 작가'],
+  ['notice','공지사항'], ['status','예약 현황'], ['process','진행 방식'], ['flow','작업 과정'], ['collab','협업 작가'],
   ['price','가격표'], ['sample','포트폴리오 · 샘플'], ['faq','자주 묻는 질문'], ['refund','환불 정책'],
   ['apply','신청 양식']
 ];
@@ -601,6 +616,7 @@ window.seedDefaults = function() {
     if (sec.title === undefined) sec.title = pair[1];
     if (sec.subtitle === undefined) sec.subtitle = '';
     if (sec.order === undefined) sec.order = SECTION_LIST.findIndex(function(p) { return p[0] === k; });
+    if (k === 'process' && sec.style === undefined) sec.style = 'list';
   });
   var p = D.sections.price;
   if (p.head1 === undefined) p.head1 = '작업 항목';
@@ -614,6 +630,7 @@ window.seedDefaults = function() {
   if (!D.notice.items) D.notice.items = [];
   if (!D.status) D.status = [];
   if (!D.process) D.process = [];
+  if (!D.flow) D.flow = [];
   if (!D.price) D.price = [];
   if (!D.samples) D.samples = [];
   if (!D.faq) D.faq = [];
@@ -657,6 +674,7 @@ window.renderAll = function() {
   document.getElementById('apply-intro').value = D.apply.intro || '';
   document.getElementById('apply-agree').value = D.apply.agree || '';
   document.getElementById('apply-quote').checked = D.apply.quote !== false;
+  document.getElementById('process-style').value = D.sections.process.style || 'list';
   document.getElementById('apply-quote_note').value = D.apply.quote_note || '';
   document.getElementById('price-head1').value = D.sections.price.head1;
   document.getElementById('price-head2').value = D.sections.price.head2;
@@ -669,7 +687,7 @@ window.renderAll = function() {
   syncPreview();
   renderTheme();
   renderSections();
-  renderNotice(); renderStatus(); renderProcess();
+  renderNotice(); renderStatus(); renderProcess(); renderFlow();
   renderCollab(); renderPrice(); renderSample(); renderFaq(); renderRefund(); renderApply(); renderPriceOpts();
 };
 
@@ -901,6 +919,17 @@ function renderProcess() {
   initSortable('process-items','process',null,renderProcess);
 }
 function addProcess() { window.D.process.push({title:'',body:''}); renderProcess(); }
+
+function renderFlow() {
+  var el = document.getElementById('flow-items'); el.innerHTML = '';
+  (window.D.flow || []).forEach(function(p, i) {
+    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">단계 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeFlow('+i+')">삭제</button></div><div class="field-grid2"><div class="field-row"><label>제목</label><input type="text" value="'+(p.title||'')+'" placeholder="단계 이름 (예: 문의 접수)" oninput="window.D.flow['+i+'].title=this.value"></div><div class="field-row"><label>설명</label><input type="text" value="'+(p.body||'')+'" placeholder="한두 줄 설명" oninput="window.D.flow['+i+'].body=this.value"></div></div></div>';
+  });
+  if (emptyHint('flow-items', '등록된 단계가 없어요.')) return;
+  initSortable('flow-items','flow',null,renderFlow);
+}
+function addFlow() { window.D.flow.push({title:'',body:''}); renderFlow(); }
+function removeFlow(i) { window.D.flow.splice(i,1); renderFlow(); }
 function removeProcess(i) { window.D.process.splice(i,1); renderProcess(); }
 
 function renderCollab() {
