@@ -546,6 +546,8 @@ function applySectionOrder(sec) {
   });
 }
 
+const nl = t => (t || '').replace(/\n/g, '<br>');
+
 function getYoutubeId(url) {
   if (!url) return null;
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
@@ -615,6 +617,51 @@ function drawPfGrid(ci, filter) {
     `<div class="sample-card">${sampleMedia(it)}${it.title ? `<div class="sample-title">${it.title}</div>` : ''}</div>`
   ).join('');
   window.parent.postMessage({ height: document.body.scrollHeight }, '*');
+}
+
+let _spy = null;
+function buildNav(sec, brand) {
+  const keys = orderedKeys(sec).filter(k => sec[k].visible !== false && sec[k].title);
+  const nav = document.getElementById('gnav');
+  const spacer = document.getElementById('gnav-spacer');
+  if (keys.length < 2) { nav.style.display = 'none'; spacer.style.height = '0px'; return; }
+
+  nav.style.display = '';
+  document.getElementById('gnav-brand').textContent = brand;
+  document.getElementById('gnav-list').innerHTML = keys
+    .map(k => '<li><a href="#sec-' + k + '" data-nav>' + (sec[k].title) + '</a></li>')
+    .join('');
+
+  const list = document.getElementById('gnav-list');
+  const toggle = document.getElementById('gnav-toggle');
+  toggle.onclick = () => {
+    const open = list.classList.toggle('open');
+    toggle.setAttribute('aria-expanded', open ? 'true' : 'false');
+  };
+  list.querySelectorAll('a').forEach(a => {
+    a.onclick = () => { list.classList.remove('open'); toggle.setAttribute('aria-expanded', 'false'); };
+  });
+
+  // 고정 네비 높이만큼 본문을 밀어줌
+  const syncSpacer = () => { spacer.style.height = nav.offsetHeight + 'px'; };
+  syncSpacer();
+  window.addEventListener('resize', syncSpacer);
+
+  // 현재 보고 있는 섹션 표시
+  if (_spy) _spy.disconnect();
+  const links = list.querySelectorAll('[data-nav]');
+  _spy = new IntersectionObserver(entries => {
+    entries.forEach(e => {
+      if (!e.isIntersecting) return;
+      links.forEach(a => a.classList.remove('active'));
+      const m = list.querySelector('[data-nav][href="#' + e.target.id + '"]');
+      if (m) m.classList.add('active');
+    });
+  }, { rootMargin: '-45% 0px -45% 0px' });
+  keys.forEach(k => {
+    const el = document.getElementById('sec-' + k);
+    if (el) _spy.observe(el);
+  });
 }
 
 function setSection(key, sec) {
