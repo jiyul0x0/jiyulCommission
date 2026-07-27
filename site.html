@@ -134,9 +134,19 @@ body.ready { opacity: 1; }
 
 /* 샘플 */
 .sample-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 20px; }
+/* 포트폴리오 탭 */
+.pf-tabs { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 26px; border-bottom: 2px solid var(--bg2); padding-bottom: 0; }
+.pf-tab { border: 0; background: none; font-family: inherit; font-size: 14px; font-weight: 700; color: var(--sub); padding: 10px 18px; cursor: pointer; border-bottom: 2px solid transparent; margin-bottom: -2px; transition: 0.15s; }
+.pf-tab:hover { color: var(--dark); }
+.pf-tab.on { color: var(--main); border-bottom-color: var(--main); }
+.pf-sub { margin-bottom: 30px; }
+.pf-sub:last-child { margin-bottom: 0; }
+.pf-sub-name { font-size: 15px; font-weight: 700; color: var(--dark); margin-bottom: 14px; display: flex; align-items: center; gap: 10px; }
+.pf-sub-name::before { content: ''; width: 4px; height: 16px; background: var(--main); border-radius: 2px; }
+.pf-empty { font-size: 13px; color: var(--sub); padding: 30px; text-align: center; background: var(--bg); border-radius: 12px; }
 .sample-card { border-radius: 14px; border: 1px solid var(--border); overflow: hidden; background: var(--bg); }
 .sample-video { position: relative; width: 100%; padding-top: 56.25%; }
-.sample-video iframe { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; }
+.sample-video iframe, .sample-video video { position: absolute; top: 0; left: 0; width: 100%; height: 100%; border: 0; background: #000; }
 .sample-thumb { width: 100%; object-fit: cover; display: block; }
 .sample-thumb-empty { width: 100%; height: 200px; display: flex; align-items: center; justify-content: center; background: var(--hero2); color: var(--sub); font-size: 13px; }
 .sample-title { padding: 12px 16px; font-size: 13px; font-weight: 700; color: var(--dark); text-align: center; }
@@ -359,7 +369,8 @@ body.ready { opacity: 1; }
   <div class="section" id="sec-sample">
     <div class="section-title" id="t-sample">포트폴리오 · 샘플</div>
     <div class="section-subtitle" id="s-sample"></div>
-    <div class="sample-grid" id="sample-grid"></div>
+    <div class="pf-tabs" id="pf-tabs"></div>
+    <div id="pf-body"></div>
   </div>
 
   <div class="section" id="sec-faq">
@@ -426,7 +437,7 @@ import { getDatabase, ref, onValue } from 'https://www.gstatic.com/firebasejs/10
 const firebaseConfig = {
   apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
   authDomain: "jiyul-commission-2e306.firebaseapp.com",
-  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
+  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com",
   projectId: "jiyul-commission-2e306",
   storageBucket: "jiyul-commission-2e306.firebasestorage.app",
   messagingSenderId: "348428402333",
@@ -540,6 +551,57 @@ function getYoutubeId(url) {
   if (!url) return null;
   const m = url.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/);
   return m ? m[1] : null;
+}
+const isVideoSrc = u => /^data:video\//.test(u) || /\.(mp4|webm|mov)(\?|$)/i.test(u);
+function sampleMedia(it) {
+  const url = it.url || '';
+  const yt = getYoutubeId(url);
+  if (yt) return `<div class="sample-video"><iframe src="https://www.youtube.com/embed/${yt}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
+  if (isVideoSrc(url)) return `<div class="sample-video"><video src="${url}" controls playsinline preload="metadata"></video></div>`;
+  if (url) return `<img class="sample-thumb" src="${url}" alt="${it.title || ''}" loading="lazy">`;
+  return `<div class="sample-thumb-empty">[ 샘플을 등록해 주세요 ]</div>`;
+}
+
+let _pfCats = [];
+function renderPortfolio(samples) {
+  // 구버전(평면 배열) 호환 → 단일 카테고리로 감싸기
+  let cats = [];
+  if (Array.isArray(samples)) {
+    if (samples.length) cats = [{ name: '전체', subs: [{ name: '', items: samples.map(s => ({ url: s.url || s.thumb || '', title: s.title || '' })) }] }];
+  } else if (samples && Array.isArray(samples.categories)) {
+    cats = samples.categories;
+  }
+  _pfCats = cats.filter(c => c && (c.subs || []).some(sub => (sub.items || []).length));
+
+  const tabs = document.getElementById('pf-tabs');
+  const body = document.getElementById('pf-body');
+  if (!_pfCats.length) { tabs.innerHTML = ''; body.innerHTML = '<div class="pf-empty">등록된 샘플이 없어요.</div>'; return; }
+
+  tabs.innerHTML = _pfCats.map((c, i) =>
+    `<button class="pf-tab${i === 0 ? ' on' : ''}" data-i="${i}">${c.name || '카테고리'}</button>`
+  ).join('');
+  tabs.style.display = _pfCats.length > 1 ? 'flex' : 'none';
+
+  tabs.querySelectorAll('.pf-tab').forEach(btn => {
+    btn.onclick = () => {
+      tabs.querySelectorAll('.pf-tab').forEach(b => b.classList.remove('on'));
+      btn.classList.add('on');
+      drawPfCat(parseInt(btn.getAttribute('data-i'), 10));
+    };
+  });
+  drawPfCat(0);
+}
+function drawPfCat(idx) {
+  const cat = _pfCats[idx];
+  const body = document.getElementById('pf-body');
+  body.innerHTML = (cat.subs || []).filter(sub => (sub.items || []).length).map(sub => {
+    const grid = sub.items.map(it =>
+      `<div class="sample-card">${sampleMedia(it)}${it.title ? `<div class="sample-title">${it.title}</div>` : ''}</div>`
+    ).join('');
+    const head = sub.name ? `<div class="pf-sub-name">${sub.name}</div>` : '';
+    return `<div class="pf-sub">${head}<div class="sample-grid">${grid}</div></div>`;
+  }).join('') || '<div class="pf-empty">이 카테고리에 등록된 샘플이 없어요.</div>';
+  window.parent.postMessage({ height: document.body.scrollHeight }, '*');
 }
 const nl = t => (t || '').replace(/\n/g, '<br>');
 let _spy = null;
@@ -699,16 +761,8 @@ onValue(ref(db, SITE_KEY), function(snapshot) {
     tb.innerHTML += `<tr><td>${p.item || ''}${badge}</td><td class="price-sub">${p.desc || ''}</td><td>${p.price || ''}</td></tr>`;
   });
 
-  // 6. 샘플
-  const sg = document.getElementById('sample-grid'); sg.innerHTML = '';
-  (d.samples || []).forEach(s => {
-    const embedId = getYoutubeId(s.url);
-    let media;
-    if (embedId) media = `<div class="sample-video"><iframe src="https://www.youtube.com/embed/${embedId}" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe></div>`;
-    else if (s.thumb) media = `<img class="sample-thumb" src="${s.thumb}" alt="${s.title || ''}">`;
-    else media = `<div class="sample-thumb-empty">[ 샘플 URL을 입력해 주세요 ]</div>`;
-    sg.innerHTML += `<div class="sample-card">${media}<div class="sample-title">${s.title || ''}</div></div>`;
-  });
+  // 6. 포트폴리오 (카테고리 → 서브 → 샘플)
+  renderPortfolio(d.samples);
 
   // 7. FAQ
   const fl = document.getElementById('faq-list'); fl.innerHTML = '';
