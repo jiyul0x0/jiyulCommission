@@ -67,6 +67,19 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
 .sec-row { display: grid; grid-template-columns: auto auto 150px 1fr; gap: 12px; align-items: center; background: var(--bg); border: 1px solid var(--border); border-radius: 10px; padding: 12px 16px; margin-bottom: 10px; }
 .sec-row input[type=checkbox] { width: 18px; height: 18px; cursor: pointer; }
 /* 로그인 */
+/* 포트폴리오 편집 */
+.pf-cat { border: 1px solid var(--border); border-radius: 12px; padding: 16px; margin-bottom: 14px; background: #fff; }
+.pf-cat-head { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.pf-cat-head .drag-handle { flex-shrink: 0; }
+.pf-cat-head input { flex: 1; font-weight: 700; }
+.pf-sub-box { border: 1px solid var(--bg2); border-radius: 10px; padding: 12px; margin: 10px 0; background: var(--bg2); }
+.pf-sub-head { display: flex; align-items: center; gap: 8px; margin-bottom: 10px; }
+.pf-sub-head input { flex: 1; }
+.pf-item { display: grid; grid-template-columns: auto 1fr auto; gap: 8px; align-items: start; background: #fff; border: 1px solid var(--border); border-radius: 8px; padding: 10px; margin-bottom: 8px; }
+.pf-item .drag-handle { padding-top: 8px; }
+.pf-item-fields { display: flex; flex-direction: column; gap: 6px; }
+.pf-thumb { width: 46px; height: 46px; border-radius: 6px; object-fit: cover; border: 1px solid var(--border); flex-shrink: 0; }
+.pf-mini { padding: 4px 10px !important; font-size: 12px !important; }
 #login-overlay { position: fixed; inset: 0; background: var(--bg2); display: flex; align-items: center; justify-content: center; z-index: 10000; padding: 20px; }
 .login-box { background: #fff; border: 1px solid var(--border); border-radius: 16px; padding: 32px; width: 100%; max-width: 380px; box-shadow: 0 8px 32px rgba(0,0,0,0.06); }
 .login-box h2 { font-size: 18px; color: var(--dark); margin-bottom: 6px; }
@@ -258,9 +271,10 @@ input[type=color] { width: 56px; height: 44px; padding: 0; border: 1px solid #d4
   </div>
 
   <div class="admin-section">
-    <div class="admin-section-title">🖼️ 6. 샘플</div>
-    <div id="sample-items"></div>
-    <button class="btn btn-green" onclick="addSample()" style="margin-top:8px;">+ 샘플 추가</button>
+    <div class="admin-section-title">🖼️ 6. 포트폴리오</div>
+    <div class="hint" style="margin-bottom:14px;"><b>카테고리</b>(탭) → <b>서브카테고리</b>(소제목) → <b>샘플</b> 순서로 구성돼요. 샘플은 개수 제한 없이 추가할 수 있고, URL 또는 직접 업로드(이미지·GIF·영상)를 지원합니다.</div>
+    <div id="pf-cats"></div>
+    <button class="btn btn-green" onclick="pfAddCat()" style="margin-top:8px;">+ 카테고리 추가</button>
   </div>
 
   <div class="admin-section">
@@ -339,13 +353,13 @@ import { getAuth, signInWithEmailAndPassword, signOut, onAuthStateChanged } from
    ★★★ 새 커미션 사이트를 만들 때는 이 부분만 교체하세요 ★★★
    ============================================================ */
 const firebaseConfig = {
-  apiKey: "AIzaSyBkEqi-OUK2In9Tku9dRw0ZqtJSHTNaloA",
-  authDomain: "jiyul-commission-2e306.firebaseapp.com",
-  databaseURL: "https://jiyul-commission-2e306-default-rtdb.firebaseio.com/",
-  projectId: "jiyul-commission-2e306",
-  storageBucket: "jiyul-commission-2e306.firebasestorage.app",
-  messagingSenderId: "348428402333",
-  appId: "1:348428402333:web:d1c5a1049618bf8cd61e74"
+  apiKey: "AIzaSyDJemQYxfZ-xNLM91I9kXe_KBW1KxSCpHQ",
+  authDomain: "jiyul-commission.firebaseapp.com",
+  databaseURL: "https://jiyul-commission-default-rtdb.firebaseio.com",
+  projectId: "jiyul-commission",
+  storageBucket: "jiyul-commission.firebasestorage.app",
+  messagingSenderId: "732523553497",
+  appId: "1:732523553497:web:e0d0ae68ed4619795f54c8"
 };
 /* ============================================================ */
 
@@ -632,7 +646,7 @@ window.seedDefaults = function() {
   if (!D.process) D.process = [];
   if (!D.flow) D.flow = [];
   if (!D.price) D.price = [];
-  if (!D.samples) D.samples = [];
+  if (!D.samples) D.samples = { categories: [] };
   if (!D.faq) D.faq = [];
   if (!D.collab) D.collab = { visible: false, items: [] };
   if (!D.collab.items) D.collab.items = [];
@@ -998,16 +1012,147 @@ function renderPrice() {
 function addPrice() { window.D.price.push({category:'',item:'',badge:'',desc:'',price:''}); renderPrice(); renderPriceOpts(); }
 function removePrice(i) { window.D.price.splice(i,1); renderPrice(); renderPriceOpts(); }
 
-function renderSample() {
-  var el = document.getElementById('sample-items'); el.innerHTML = '';
-  (window.D.samples||[]).forEach(function(s,i) {
-    el.innerHTML += '<div class="item-card"><div class="item-card-header"><span style="display:flex;align-items:center;gap:8px;"><span class="drag-handle">'+H+'</span><span class="item-card-num">샘플 '+(i+1)+'</span></span><button class="btn btn-red" onclick="removeSample('+i+')">삭제</button></div><div class="field-row"><label>제목</label><input type="text" value="'+(s.title||'')+'" placeholder="샘플 제목" oninput="window.D.samples['+i+'].title=this.value"></div><div class="field-row"><label>유튜브 URL</label><input type="text" value="'+(s.url||'')+'" placeholder="https://youtu.be/xxxxx" oninput="window.D.samples['+i+'].url=this.value"></div><div class="field-row"><label>이미지 URL (유튜브 대신 사용)</label><input type="text" value="'+(s.thumb||'')+'" placeholder="https://..." oninput="window.D.samples['+i+'].thumb=this.value"></div></div>';
-  });
-  if (emptyHint('sample-items', '등록된 샘플이 없어요.')) return;
-  initSortable('sample-items','samples',null,renderSample);
+/* ---------- 포트폴리오 (카테고리 → 서브 → 샘플) ---------- */
+function pfData() {
+  // 구조 정규화 + 구버전(배열) 마이그레이션
+  var s = window.D.samples;
+  if (Array.isArray(s)) {
+    window.D.samples = { categories: s.length
+      ? [{ name: '기본', subs: [{ name: '', items: s.map(function(x){ return { url: x.url || x.thumb || '', title: x.title || '' }; }) }] }]
+      : [] };
+  } else if (!s || !Array.isArray(s.categories)) {
+    window.D.samples = { categories: [] };
+  }
+  return window.D.samples.categories;
 }
-function addSample() { window.D.samples.push({title:'',url:'',thumb:''}); renderSample(); }
-function removeSample(i) { window.D.samples.splice(i,1); renderSample(); }
+
+function pfIsVideo(u) { return /^data:video\//.test(u) || /\.(mp4|webm|mov)(\?|$)/i.test(u); }
+function pfPreview(u) {
+  if (!u) return '';
+  var yt = (u.match(/(?:youtu\.be\/|youtube\.com\/(?:watch\?v=|embed\/|shorts\/))([\w-]{11})/) || [])[1];
+  if (yt) return '<img class="pf-thumb" src="https://img.youtube.com/vi/' + yt + '/default.jpg">';
+  if (pfIsVideo(u)) return '<div class="pf-thumb" style="display:flex;align-items:center;justify-content:center;background:#000;color:#fff;font-size:18px;">▶</div>';
+  return '<img class="pf-thumb" src="' + u + '">';
+}
+
+function renderSample() {
+  var cats = pfData();
+  var wrap = document.getElementById('pf-cats');
+  wrap.innerHTML = '';
+
+  cats.forEach(function(cat, ci) {
+    if (!cat.subs) cat.subs = [];
+    var subsHtml = cat.subs.map(function(sub, si) {
+      if (!sub.items) sub.items = [];
+      var itemsHtml = sub.items.map(function(it, ii) {
+        var isUp = (it.url || '').indexOf('data:') === 0;
+        return '<div class="pf-item" data-ii="' + ii + '">' +
+          '<span class="drag-handle">' + H + '</span>' +
+          '<div class="pf-item-fields">' +
+            '<input type="text" value="' + (it.title || '').replace(/"/g,'&quot;') + '" placeholder="제목 (선택)" oninput="pfSet(' + ci + ',' + si + ',' + ii + ',\'title\',this.value)">' +
+            '<input type="text" value="' + (isUp ? '' : (it.url || '').replace(/"/g,'&quot;')) + '" placeholder="URL — 이미지/GIF/mp4/유튜브" oninput="pfSet(' + ci + ',' + si + ',' + ii + ',\'url\',this.value)">' +
+            '<label class="btn pf-mini" style="background:#eee;color:#555;width:fit-content;">⬆️ 직접 업로드<input type="file" accept="image/*,video/*" style="display:none;" onchange="pfUpload(this,' + ci + ',' + si + ',' + ii + ')"></label>' +
+          '</div>' +
+          '<div style="display:flex;flex-direction:column;gap:6px;align-items:center;">' +
+            pfPreview(it.url) +
+            '<button class="btn btn-red pf-mini" onclick="pfDelItem(' + ci + ',' + si + ',' + ii + ')">삭제</button>' +
+          '</div>' +
+        '</div>';
+      }).join('');
+      return '<div class="pf-sub-box">' +
+        '<div class="pf-sub-head">' +
+          '<span class="drag-handle">' + H + '</span>' +
+          '<input type="text" value="' + (sub.name || '').replace(/"/g,'&quot;') + '" placeholder="서브카테고리 이름 (예: 기본 리깅)" oninput="pfSetSub(' + ci + ',' + si + ',this.value)">' +
+          '<button class="btn btn-red pf-mini" onclick="pfDelSub(' + ci + ',' + si + ')">서브 삭제</button>' +
+        '</div>' +
+        '<div class="pf-items" data-ci="' + ci + '" data-si="' + si + '">' + itemsHtml + '</div>' +
+        '<button class="btn btn-green pf-mini" onclick="pfAddItem(' + ci + ',' + si + ')" style="margin-top:4px;">+ 샘플</button>' +
+      '</div>';
+    }).join('');
+
+    var div = document.createElement('div');
+    div.className = 'pf-cat';
+    div.setAttribute('data-ci', ci);
+    div.innerHTML =
+      '<div class="pf-cat-head">' +
+        '<span class="drag-handle">' + H + '</span>' +
+        '<input type="text" value="' + (cat.name || '').replace(/"/g,'&quot;') + '" placeholder="카테고리 이름 (탭으로 표시)" oninput="pfSetCat(' + ci + ',this.value)">' +
+        '<button class="btn btn-red pf-mini" onclick="pfDelCat(' + ci + ')">카테고리 삭제</button>' +
+      '</div>' +
+      subsHtml +
+      '<button class="btn pf-mini" style="background:var(--bg2);color:var(--dark);margin-top:4px;" onclick="pfAddSub(' + ci + ')">+ 서브카테고리</button>';
+    wrap.appendChild(div);
+  });
+
+  if (!cats.length) wrap.innerHTML = '<div class="hint" style="padding:14px 0;">카테고리가 없어요. 아래 버튼으로 추가해 주세요.</div>';
+  pfInitSort();
+}
+
+var _pfSort = [];
+function pfInitSort() {
+  _pfSort.forEach(function(s){ try{s.destroy();}catch(e){} });
+  _pfSort = [];
+  var cats = pfData();
+  var wrap = document.getElementById('pf-cats');
+
+  // 카테고리 정렬
+  _pfSort.push(Sortable.create(wrap, {
+    handle: '.pf-cat-head > .drag-handle', animation: 150, ghostClass: 'sortable-ghost',
+    onEnd: function(e) { cats.splice(e.newIndex, 0, cats.splice(e.oldIndex, 1)[0]); renderSample(); }
+  }));
+
+  // 각 카테고리 안 서브 정렬
+  wrap.querySelectorAll('.pf-cat').forEach(function(catEl) {
+    var ci = +catEl.getAttribute('data-ci');
+    _pfSort.push(Sortable.create(catEl, {
+      handle: '.pf-sub-head > .drag-handle', draggable: '.pf-sub-box', animation: 150, ghostClass: 'sortable-ghost',
+      onEnd: function(e) {
+        var subs = cats[ci].subs;
+        subs.splice(e.newIndex, 0, subs.splice(e.oldIndex, 1)[0]);
+        renderSample();
+      }
+    }));
+  });
+
+  // 각 서브 안 샘플 정렬
+  wrap.querySelectorAll('.pf-items').forEach(function(box) {
+    var ci = +box.getAttribute('data-ci'), si = +box.getAttribute('data-si');
+    _pfSort.push(Sortable.create(box, {
+      handle: '.drag-handle', animation: 150, ghostClass: 'sortable-ghost',
+      onEnd: function(e) {
+        var items = cats[ci].subs[si].items;
+        items.splice(e.newIndex, 0, items.splice(e.oldIndex, 1)[0]);
+        renderSample();
+      }
+    }));
+  });
+}
+
+function pfSetCat(ci, v) { pfData()[ci].name = v; }
+function pfSetSub(ci, si, v) { pfData()[ci].subs[si].name = v; }
+function pfSetSub2() {}
+function pfSet(ci, si, ii, key, v) { pfData()[ci].subs[si].items[ii][key] = v; }
+
+function pfAddCat() { pfData().push({ name: '', subs: [{ name: '', items: [] }] }); renderSample(); }
+function pfDelCat(ci) { if (!confirm('이 카테고리를 삭제할까요? 안의 샘플도 모두 지워집니다.')) return; pfData().splice(ci, 1); renderSample(); }
+function pfAddSub(ci) { pfData()[ci].subs.push({ name: '', items: [] }); renderSample(); }
+function pfDelSub(ci, si) { if (!confirm('이 서브카테고리를 삭제할까요?')) return; pfData()[ci].subs.splice(si, 1); renderSample(); }
+function pfAddItem(ci, si) { pfData()[ci].subs[si].items.push({ url: '', title: '' }); renderSample(); }
+function pfDelItem(ci, si, ii) { pfData()[ci].subs[si].items.splice(ii, 1); renderSample(); }
+
+function pfUpload(input, ci, si, ii) {
+  var f = input.files[0];
+  if (!f) return;
+  var isVid = f.type.indexOf('video/') === 0;
+  var limit = isVid ? 3 * 1024 * 1024 : 1.5 * 1024 * 1024;
+  if (f.size > limit) {
+    alert((isVid ? '영상은 3MB' : '이미지는 1.5MB') + ' 이하만 업로드할 수 있어요.\n큰 파일은 유튜브 링크나 이미지 호스팅 URL을 권장합니다.');
+    input.value = ''; return;
+  }
+  var r = new FileReader();
+  r.onload = function(e) { pfData()[ci].subs[si].items[ii].url = e.target.result; renderSample(); };
+  r.readAsDataURL(f);
+}
 
 function renderFaq() {
   var el = document.getElementById('faq-items'); el.innerHTML = '';
